@@ -11,5 +11,6 @@ ckpt/
 .pnpm-store/
 repair/logs/
 backend/storage/
+data/models/
 Frontend/.vite/
 *.log

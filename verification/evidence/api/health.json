@@ -12,18 +12,18 @@
       },
       "asr": {
         "loaded": false,
-        "model": "qwen-0.6b",
+        "model": "Mega-ASR",
         "device": "cpu",
         "dtype": "float32",
-        "available": false,
-        "reason": "Mega-ASR/Qwen3-ASR runtime is not bundled with this workspace backend."
+        "available": true,
+        "reason": null
       },
       "ocr": {
-        "loaded": false,
+        "loaded": true,
         "engine": "paddleocr",
         "device": "cpu",
         "language": "en",
-        "available": false,
+        "available": true,
         "fallback_enabled": true
       },
       "ollama": {

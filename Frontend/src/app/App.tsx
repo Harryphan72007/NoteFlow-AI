@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import {
@@ -25,6 +25,8 @@ import {
   listCustomers,
   listDocuments,
   listTasks,
+  ocrFile,
+  transcribeFile,
 } from "../api/client";
 
 const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
@@ -135,12 +137,13 @@ function mapCustomer(customer: ApiCustomer, documentCount: number): CustomerRow 
 }
 
 function mapDocument(document: ApiDocument, customerName: string): DocumentRow {
+  const confidence = document.average_confidence ?? null;
   return {
     id: document.document_id,
     name: document.source_name,
     customer: customerName,
     type: documentType(document.source_type),
-    confidence: document.average_confidence ?? null,
+    confidence: confidence !== null && confidence <= 1 ? confidence * 100 : confidence,
     status: document.status,
     date: formatDisplayDate(document.created_at),
     customerId: document.customer_id,
@@ -834,9 +837,11 @@ function CustomerWorkspaceScreen({ onNavigate }: { onNavigate: (s: Screen) => vo
 function NewProcessingScreen({
   customerRows = customers,
   onSaveManualNote,
+  onProcessed,
 }: {
   customerRows?: CustomerRow[];
   onSaveManualNote?: (payload: { customerId?: string; sourceName: string; text: string }) => Promise<void>;
+  onProcessed?: (document: ApiDocument) => Promise<void>;
 }) {
   const [mode, setMode] = useState<"record" | "upload-audio" | "scan" | "upload-pdf" | "note">("record");
   const [customer, setCustomer] = useState(customerRows[0]?.backendId ?? customerRows[0]?.id ?? "PT-001847");
@@ -844,13 +849,116 @@ function NewProcessingScreen({
   const [noteTitle, setNoteTitle] = useState("Visit Note — January 15, 2024");
   const [noteText, setNoteText] = useState("Patient presents with ongoing management of Type 2 Diabetes Mellitus. HbA1c at last check was 7.2%. Current medications include Metformin 1000mg BD and Empagliflozin 10mg OD. Blood pressure 128/82 mmHg today. No new symptoms.");
   const [savingNote, setSavingNote] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [audioFile, setAudioFile] = useState<File>();
+  const [documentFile, setDocumentFile] = useState<File>();
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const documentInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder>();
+  const mediaStreamRef = useRef<MediaStream>();
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const shouldUploadRecordingRef = useRef(false);
 
   useEffect(() => {
     const validSelection = customerRows.some(c => (c.backendId ?? c.id) === customer);
-    if (!validSelection && customerRows[0]) {
-      setCustomer(customerRows[0].backendId ?? customerRows[0].id);
+    if (!validSelection) {
+      setCustomer(customerRows[0] ? customerRows[0].backendId ?? customerRows[0].id : "");
     }
   }, [customer, customerRows]);
+
+  useEffect(() => {
+    if (!isRecording) return;
+    const timer = window.setInterval(() => setRecordingSeconds(value => value + 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [isRecording]);
+
+  useEffect(() => () => {
+    shouldUploadRecordingRef.current = false;
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+    mediaStreamRef.current?.getTracks().forEach(track => track.stop());
+  }, []);
+
+  const reportError = (error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(message);
+    window.alert(message);
+  };
+
+  const submitTranscription = async (selectedFile = audioFile) => {
+    if (!selectedFile || processing) return;
+    setProcessing(true);
+    try {
+      const document = await transcribeFile(selectedFile, customer, "en");
+      await onProcessed?.(document);
+    } catch (error) {
+      reportError(error);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const submitOcr = async () => {
+    if (!documentFile || processing) return;
+    setProcessing(true);
+    try {
+      const document = await ocrFile(documentFile, customer, "en");
+      await onProcessed?.(document);
+    } catch (error) {
+      reportError(error);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const stopRecording = (upload: boolean) => {
+    shouldUploadRecordingRef.current = upload;
+    const recorder = mediaRecorderRef.current;
+    if (recorder && recorder.state !== "inactive") recorder.stop();
+  };
+
+  const toggleRecording = async () => {
+    if (isRecording) {
+      stopRecording(true);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const preferredTypes = ["audio/webm;codecs=opus", "audio/ogg;codecs=opus", "audio/mp4"];
+      const mimeType = preferredTypes.find(type => MediaRecorder.isTypeSupported(type));
+      const recorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      recordedChunksRef.current = [];
+      shouldUploadRecordingRef.current = true;
+      mediaStreamRef.current = stream;
+      mediaRecorderRef.current = recorder;
+      setRecordingSeconds(0);
+      recorder.ondataavailable = event => {
+        if (event.data.size) recordedChunksRef.current.push(event.data);
+      };
+      recorder.onstop = async () => {
+        setIsRecording(false);
+        stream.getTracks().forEach(track => track.stop());
+        mediaStreamRef.current = undefined;
+        if (!shouldUploadRecordingRef.current || !recordedChunksRef.current.length) return;
+        const actualType = recorder.mimeType || "audio/webm";
+        const extension = actualType.includes("ogg") ? "ogg" : actualType.includes("mp4") ? "m4a" : "webm";
+        const recordedFile = new File(recordedChunksRef.current, `recording.${extension}`, { type: actualType });
+        setAudioFile(recordedFile);
+        await submitTranscription(recordedFile);
+      };
+      recorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      reportError(error);
+    }
+  };
+
+  const selectMode = (nextMode: typeof mode) => {
+    if (isRecording) stopRecording(false);
+    setMode(nextMode);
+  };
 
   const saveManualNote = async () => {
     if (!onSaveManualNote || savingNote) return;
@@ -896,7 +1004,7 @@ function NewProcessingScreen({
             {modes.map(({ id, icon: Icon, label }) => (
               <button
                 key={id}
-                onClick={() => { setMode(id); setIsRecording(false); }}
+                onClick={() => selectMode(id)}
                 className={cn(
                   "flex flex-col items-center gap-2 py-4 px-2 rounded-lg border-2 transition-all text-center",
                   mode === id
@@ -921,7 +1029,9 @@ function NewProcessingScreen({
                 </div>
                 {isRecording && (
                   <div className="space-y-1">
-                    <div className="text-3xl font-mono font-semibold text-red-600">00:42</div>
+                    <div className="text-3xl font-mono font-semibold text-red-600">
+                      {String(Math.floor(recordingSeconds / 60)).padStart(2, "0")}:{String(recordingSeconds % 60).padStart(2, "0")}
+                    </div>
                     <div className="flex justify-center gap-px h-8 items-center">
                       {Array.from({ length: 20 }, (_, i) => (
                         <div key={i} className="w-1 bg-red-400 rounded-full animate-pulse"
@@ -937,7 +1047,7 @@ function NewProcessingScreen({
                   variant={isRecording ? "danger" : "primary"}
                   size="lg"
                   icon={isRecording ? <XCircle className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  onClick={() => setIsRecording(v => !v)}
+                  onClick={toggleRecording}
                   className="justify-center"
                 >
                   {isRecording ? "Stop Recording" : "Start Recording"}
@@ -954,11 +1064,25 @@ function NewProcessingScreen({
 
             {mode === "upload-audio" && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-border rounded-lg p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                <input
+                  ref={audioInputRef}
+                  type="file"
+                  accept=".wav,.mp3,.m4a,.flac,.ogg,.webm,audio/*"
+                  className="hidden"
+                  onChange={event => setAudioFile(event.target.files?.[0])}
+                />
+                <div
+                  className="border-2 border-dashed border-border rounded-lg p-10 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                  onDragOver={event => event.preventDefault()}
+                  onDrop={event => {
+                    event.preventDefault();
+                    setAudioFile(event.dataTransfer.files[0]);
+                  }}
+                >
                   <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm font-medium text-foreground">Drop audio file here</p>
                   <p className="text-xs text-muted-foreground mt-1">MP3, WAV, M4A, OGG · up to 500 MB</p>
-                  <Btn variant="outline" size="sm" className="mt-3">Browse Files</Btn>
+                  <Btn variant="outline" size="sm" className="mt-3" onClick={() => audioInputRef.current?.click()}>Browse Files</Btn>
                 </div>
                 {[
                   { label: "ASR Model",  type: "select", opts: ["Mega-ASR v2.4", "Qwen3-ASR v3.1"] },
@@ -971,13 +1095,35 @@ function NewProcessingScreen({
                     </select>
                   </div>
                 ))}
-                <Btn variant="primary" size="lg" className="w-full justify-center">Start Transcription</Btn>
+                <Btn variant="primary" size="lg" className="w-full justify-center" onClick={() => submitTranscription()} disabled={!audioFile || processing}>Start Transcription</Btn>
               </div>
             )}
 
             {(mode === "scan" || mode === "upload-pdf") && (
               <div className="space-y-4">
-                <div className="border-2 border-dashed border-border rounded-lg p-10 text-center hover:border-primary/50 transition-colors cursor-pointer">
+                <input
+                  ref={documentInputRef}
+                  type="file"
+                  accept=".pdf,.png,.jpg,.jpeg,.webp,.tif,.tiff,image/*"
+                  className="hidden"
+                  onChange={event => setDocumentFile(event.target.files?.[0])}
+                />
+                <input
+                  ref={cameraInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={event => setDocumentFile(event.target.files?.[0])}
+                />
+                <div
+                  className="border-2 border-dashed border-border rounded-lg p-10 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                  onDragOver={event => event.preventDefault()}
+                  onDrop={event => {
+                    event.preventDefault();
+                    setDocumentFile(event.dataTransfer.files[0]);
+                  }}
+                >
                   {mode === "scan" ? <Scan className="w-8 h-8 text-muted-foreground mx-auto mb-2" /> : <FileUp className="w-8 h-8 text-muted-foreground mx-auto mb-2" />}
                   <p className="text-sm font-medium text-foreground">
                     {mode === "scan" ? "Capture via scanner or camera" : "Drop PDF or image here"}
@@ -986,8 +1132,8 @@ function NewProcessingScreen({
                     {mode === "scan" ? "Use connected scanner device" : "PDF, PNG, JPG, TIFF · up to 50 MB"}
                   </p>
                   <div className="flex gap-2 justify-center mt-3">
-                    {mode === "scan" && <Btn variant="primary" size="sm" icon={<Scan className="w-3.5 h-3.5" />}>Open Scanner</Btn>}
-                    <Btn variant="outline" size="sm">Browse Files</Btn>
+                    {mode === "scan" && <Btn variant="primary" size="sm" icon={<Scan className="w-3.5 h-3.5" />} onClick={() => cameraInputRef.current?.click()}>Open Scanner</Btn>}
+                    <Btn variant="outline" size="sm" onClick={() => documentInputRef.current?.click()}>Browse Files</Btn>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1007,7 +1153,7 @@ function NewProcessingScreen({
                     ))}
                   </div>
                 </div>
-                <Btn variant="primary" size="lg" className="w-full justify-center">Start OCR Processing</Btn>
+                <Btn variant="primary" size="lg" className="w-full justify-center" onClick={submitOcr} disabled={!documentFile || processing}>Start OCR Processing</Btn>
               </div>
             )}
 
@@ -2180,12 +2326,17 @@ export default function App() {
     await refreshApiData();
   };
 
+  const handleProcessedDocument = async (_document: ApiDocument) => {
+    await refreshApiData();
+    setScreen("documents");
+  };
+
   const screenEl = ((): React.ReactNode => {
     switch (screen) {
       case "dashboard":          return <DashboardScreen          onNavigate={setScreen} />;
       case "customers":          return <CustomersScreen           customerRows={customerRows} onCreateCustomer={handleCreateCustomer} onNavigate={setScreen} />;
       case "customer-workspace": return <CustomerWorkspaceScreen   onNavigate={setScreen} />;
-      case "new-processing":     return <NewProcessingScreen       customerRows={customerRows} onSaveManualNote={handleSaveManualNote} />;
+      case "new-processing":     return <NewProcessingScreen       customerRows={customerRows} onSaveManualNote={handleSaveManualNote} onProcessed={handleProcessedDocument} />;
       case "documents":          return <DocumentsScreen           documentRows={documentRows} onNavigate={setScreen} />;
       case "asr-review":         return <ASRReviewScreen           onNavigate={setScreen} />;
       case "ocr-review":         return <OCRReviewScreen           onNavigate={setScreen} />;

@@ -21,8 +21,15 @@ class Settings:
     database_url: str = os.getenv("DATABASE_URL", "sqlite:///./data/noteflow.db")
     auto_create_db: bool = _bool("APP_AUTO_CREATE_DB", True)
 
-    asr_model_mode: str = os.getenv("ASR_MODEL_MODE", "qwen-0.6b")
+    asr_model_mode: str = os.getenv("ASR_MODEL_MODE", "Mega-ASR")
     mega_asr_device: str = os.getenv("MEGA_ASR_DEVICE", "cpu")
+    mega_asr_root: Path = Path(os.getenv("MEGA_ASR_ROOT", "D:/Mega-ASR/Mega-ASR"))
+    mega_asr_python: Path = Path(
+        os.getenv("MEGA_ASR_PYTHON", "C:/Users/Dell/anaconda3/envs/mega-asr/python.exe")
+    )
+    mega_asr_ckpt_dir: Path = Path(os.getenv("MEGA_ASR_CKPT_DIR", "D:/Mega-ASR/Mega-ASR/ckpt/Mega-ASR"))
+    mega_asr_numba_cache_dir: Path = Path(os.getenv("MEGA_ASR_NUMBA_CACHE_DIR", "./data/models/numba_cache"))
+    mega_asr_timeout_seconds: int = int(os.getenv("MEGA_ASR_TIMEOUT_SECONDS", "3600"))
     asr_dtype: str = os.getenv("ASR_DTYPE", "float32")
     asr_max_file_mb: int = int(os.getenv("ASR_MAX_FILE_MB", "100"))
     asr_max_duration_seconds: int = int(os.getenv("ASR_MAX_DURATION_SECONDS", "3600"))
@@ -31,6 +38,12 @@ class Settings:
     ocr_engine: str = os.getenv("OCR_ENGINE", "paddleocr")
     ocr_language: str = os.getenv("OCR_LANGUAGE", "en")
     ocr_device: str = os.getenv("OCR_DEVICE", "cpu")
+    ocr_detection_model_dir: Path = Path(
+        os.getenv("OCR_DETECTION_MODEL_DIR", "./data/models/paddleocr/PP-OCRv6_medium_det")
+    )
+    ocr_recognition_model_dir: Path = Path(
+        os.getenv("OCR_RECOGNITION_MODEL_DIR", "./data/models/paddleocr/PP-OCRv6_medium_rec")
+    )
     ocr_max_file_mb: int = int(os.getenv("OCR_MAX_FILE_MB", "50"))
     ocr_max_pdf_pages: int = int(os.getenv("OCR_MAX_PDF_PAGES", "50"))
     ocr_general_confidence_threshold: float = float(os.getenv("OCR_GENERAL_CONFIDENCE_THRESHOLD", "0.80"))

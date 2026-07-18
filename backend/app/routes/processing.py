@@ -10,6 +10,8 @@ from .. import models
 from ..config import settings
 from ..database import get_db
 from ..serializers import document_to_response
+from ..services.asr import ASRServiceError, transcribe_audio
+from ..services.ocr import OCRServiceError, recognize_document
 from ..services.storage import save_upload
 
 
@@ -47,7 +49,19 @@ async def transcribe(
         confidence = 1.0
         metadata["warning"] = "Text fallback used for ASR endpoint; no real audio model inference was run."
     else:
-        raise HTTPException(status_code=503, detail="ASR model runtime is not installed. Upload .txt only when ASR_ALLOW_TEXT_FALLBACK is enabled for API testing.")
+        try:
+            result = transcribe_audio(path)
+        except ASRServiceError as exc:
+            raise HTTPException(status_code=503, detail={"code": exc.code, "message": str(exc)}) from exc
+        text = result["text"]
+        metadata.update(
+            {
+                "real_inference": True,
+                "route_source": result.get("route_source"),
+                "use_lora": result.get("use_lora"),
+                "degraded_probability": result.get("degraded_prob"),
+            }
+        )
 
     document = models.Document(
         customer_id=customer_id if save_document else None,
@@ -90,11 +104,22 @@ async def ocr(
         "quality_warnings": [],
     }
     confidence = 0.99
+    page_results = None
     if suffix == ".txt" and settings.ocr_allow_text_fallback:
         text = body.decode("utf-8", errors="replace")
         metadata["warning"] = "Text fallback used for OCR endpoint; no real OCR model inference was run."
     else:
-        raise HTTPException(status_code=503, detail="OCR runtime is not installed. Upload .txt only when OCR_ALLOW_TEXT_FALLBACK is enabled for API testing.")
+        try:
+            result = recognize_document(path, suffix, language)
+        except OCRServiceError as exc:
+            raise HTTPException(status_code=422, detail={"code": "ocr_error", "message": str(exc)}) from exc
+        text = result["text"]
+        confidence = result["average_confidence"]
+        page_results = result["pages"]
+        metadata["real_inference"] = True
+        metadata["quality_warnings"] = sorted(
+            {warning for page_result in page_results for warning in page_result["quality_warnings"]}
+        )
 
     document = models.Document(
         customer_id=customer_id if save_document else None,
@@ -109,10 +134,50 @@ async def ocr(
         average_confidence=confidence,
         metadata_json=json.dumps(metadata),
     )
-    page = models.OCRPage(page_number=1, width=1000, height=1400, original_image_path=str(path), processed_image_path=str(path), average_confidence=confidence)
-    for idx, line in enumerate([line.strip() for line in text.splitlines() if line.strip()] or [text.strip()]):
-        page.blocks.append(models.OCRBlock(text=line, confidence=confidence, x1=64, y1=80 + idx * 36, x2=900, y2=110 + idx * 36, reading_order=idx, region_type="paragraph"))
-    document.ocr_pages.append(page)
+    if page_results is None:
+        page_results = [
+            {
+                "page_number": 1,
+                "width": 1000,
+                "height": 1400,
+                "image_path": path,
+                "average_confidence": confidence,
+                "blocks": [
+                    {
+                        "text": line,
+                        "confidence": confidence,
+                        "x1": 64,
+                        "y1": 80 + idx * 36,
+                        "x2": 900,
+                        "y2": 110 + idx * 36,
+                    }
+                    for idx, line in enumerate([line.strip() for line in text.splitlines() if line.strip()] or [text.strip()])
+                ],
+            }
+        ]
+    for page_result in page_results:
+        page = models.OCRPage(
+            page_number=page_result["page_number"],
+            width=page_result["width"],
+            height=page_result["height"],
+            original_image_path=str(path),
+            processed_image_path=str(page_result["image_path"]),
+            average_confidence=page_result["average_confidence"],
+        )
+        for idx, block in enumerate(page_result["blocks"]):
+            page.blocks.append(
+                models.OCRBlock(
+                    text=block["text"],
+                    confidence=block["confidence"],
+                    x1=block["x1"],
+                    y1=block["y1"],
+                    x2=block["x2"],
+                    y2=block["y2"],
+                    reading_order=idx,
+                    region_type="paragraph",
+                )
+            )
+        document.ocr_pages.append(page)
     db.add(document)
     db.add(models.AuditLog(customer_id=customer_id, document=document, action="ocr_document_created", new_value_json=json.dumps({"fallback": suffix == ".txt"})))
     db.commit()

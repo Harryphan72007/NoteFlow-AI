@@ -19,6 +19,26 @@ def test_invalid_email_is_rejected(client):
     assert response.status_code == 422
 
 
+def test_audio_magic_bytes_must_match_extension(client):
+    response = client.post(
+        "/api/transcribe",
+        files={"file": ("recording.wav", b"this is text, not a wave file", "audio/wav")},
+    )
+
+    assert response.status_code == 415
+    assert "does not match" in response.json()["detail"]
+
+
+def test_ocr_magic_bytes_must_match_extension(client):
+    response = client.post(
+        "/api/ocr",
+        files={"file": ("scan.png", b"%PDF-1.7\nnot a png", "image/png")},
+    )
+
+    assert response.status_code == 415
+    assert "does not match" in response.json()["detail"]
+
+
 def test_wrong_customer_cannot_read_edit_delete_or_export_document(client):
     customer_a = _customer(client, "SEC-A")
     customer_b = _customer(client, "SEC-B")

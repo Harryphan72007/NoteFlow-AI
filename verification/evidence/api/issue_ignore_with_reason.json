@@ -4,9 +4,9 @@
   "expected_status": 200,
   "pass": true,
   "body": {
-    "id": "issue_67250eb492d2",
+    "id": "issue_e0956787ce48",
     "status": "ignore",
     "reviewer_reason": "Audit reason",
-    "resolved_at": "2026-07-18T05:04:56.674478"
+    "resolved_at": "2026-07-18T08:28:01.316665"
   }
 }

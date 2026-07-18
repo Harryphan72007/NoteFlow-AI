@@ -91,6 +91,25 @@ export function createManualDocument(payload: {
   });
 }
 
+export function transcribeFile(file: File, customerId?: string, language = "en") {
+  const body = new FormData();
+  body.append("file", file);
+  if (customerId) body.append("customer_id", customerId);
+  body.append("language", language);
+  body.append("save_document", "true");
+  return apiFetch<ApiDocument>("/transcribe", { method: "POST", body });
+}
+
+export function ocrFile(file: File, customerId?: string, language = "en") {
+  const body = new FormData();
+  body.append("file", file);
+  if (customerId) body.append("customer_id", customerId);
+  body.append("language", language);
+  body.append("preprocess", "true");
+  body.append("save_document", "true");
+  return apiFetch<ApiDocument>("/ocr", { method: "POST", body });
+}
+
 export function listTasks() {
   return apiFetch<ApiTask[]>("/tasks");
 }

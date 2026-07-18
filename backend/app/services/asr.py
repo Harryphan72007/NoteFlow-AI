@@ -20,6 +20,31 @@ class ASRServiceError(RuntimeError):
 _INFERENCE_LOCK = threading.Lock()
 
 
+def using_small_cpu_model() -> bool:
+    return settings.asr_model_mode.strip().lower() in {
+        "qwen3-asr-0.6b",
+        "qwen3-asr-small",
+        "small",
+    }
+
+
+def asr_runtime_requirements() -> tuple[Path, ...]:
+    if using_small_cpu_model():
+        return (
+            settings.mega_asr_python,
+            Path(__file__).with_name("asr_small_runner.py"),
+            settings.qwen_asr_small_model_dir,
+            settings.qwen_asr_small_model_dir / "config.json",
+        )
+    return (
+        settings.mega_asr_python,
+        settings.mega_asr_root / "infer.py",
+        settings.mega_asr_ckpt_dir / "Qwen3-ASR-1.7B",
+        settings.mega_asr_ckpt_dir / "mega-asr-merged",
+        settings.mega_asr_ckpt_dir / "audio_quality_router" / "best_acc_model.safetensors",
+    )
+
+
 def _error_code(output: str) -> str:
     lowered = output.lower()
     if "out of memory" in lowered or "cannot allocate memory" in lowered:
@@ -46,7 +71,7 @@ def _parse_result(stdout: str) -> dict:
             if text:
                 parsed["text"] = text
                 return parsed
-    raise ASRServiceError("transcription_error", "Mega-ASR returned no non-empty transcript")
+    raise ASRServiceError("transcription_error", "ASR model returned no non-empty transcript")
 
 
 def _transcode_to_wav(path: Path) -> Path:
@@ -74,16 +99,9 @@ def _transcode_to_wav(path: Path) -> Path:
 
 
 def transcribe_audio(path: Path) -> dict:
-    required = (
-        settings.mega_asr_python,
-        settings.mega_asr_root / "infer.py",
-        settings.mega_asr_ckpt_dir / "Qwen3-ASR-1.7B",
-        settings.mega_asr_ckpt_dir / "mega-asr-merged",
-        settings.mega_asr_ckpt_dir / "audio_quality_router" / "best_acc_model.safetensors",
-    )
-    missing = [str(item) for item in required if not item.exists()]
+    missing = [str(item) for item in asr_runtime_requirements() if not item.exists()]
     if missing:
-        raise ASRServiceError("model_loading", f"Mega-ASR runtime is incomplete: {missing}")
+        raise ASRServiceError("model_loading", f"ASR runtime is incomplete: {missing}")
     if not _INFERENCE_LOCK.acquire(blocking=False):
         raise ASRServiceError("server_busy", "Mega-ASR is already processing another request")
     converted_path: Path | None = None
@@ -96,28 +114,47 @@ def transcribe_audio(path: Path) -> dict:
         cache_dir.mkdir(parents=True, exist_ok=True)
         process_env = os.environ.copy()
         process_env["NUMBA_CACHE_DIR"] = str(cache_dir)
-        command = [
-            str(settings.mega_asr_python),
-            "infer.py",
-            "--audio",
-            str(inference_path.resolve()),
-            "--ckpt_dir",
-            str(settings.mega_asr_ckpt_dir),
-            "--device_map",
-            settings.mega_asr_device,
-        ]
+        if using_small_cpu_model():
+            command = [
+                str(settings.mega_asr_python),
+                str(Path(__file__).with_name("asr_small_runner.py")),
+                "--audio",
+                str(inference_path.resolve()),
+                "--model_path",
+                str(settings.qwen_asr_small_model_dir),
+                "--device_map",
+                settings.mega_asr_device,
+                "--max_new_tokens",
+                str(settings.asr_max_new_tokens),
+            ]
+        else:
+            command = [
+                str(settings.mega_asr_python),
+                "infer.py",
+                "--audio",
+                str(inference_path.resolve()),
+                "--ckpt_dir",
+                str(settings.mega_asr_ckpt_dir),
+                "--device_map",
+                settings.mega_asr_device,
+            ]
         try:
+            timeout_seconds = (
+                settings.asr_small_timeout_seconds
+                if using_small_cpu_model()
+                else settings.mega_asr_timeout_seconds
+            )
             completed = subprocess.run(
                 command,
                 cwd=settings.mega_asr_root,
                 capture_output=True,
                 text=True,
-                timeout=settings.mega_asr_timeout_seconds,
+                timeout=timeout_seconds,
                 check=False,
                 env=process_env,
             )
         except subprocess.TimeoutExpired as exc:
-            raise ASRServiceError("transcription_error", "Mega-ASR inference timed out") from exc
+            raise ASRServiceError("transcription_error", f"{settings.asr_model_mode} inference timed out") from exc
         output = "\n".join(part for part in (completed.stdout, completed.stderr) if part)
         if completed.returncode != 0:
             raise ASRServiceError(_error_code(output), output.strip()[-2000:])

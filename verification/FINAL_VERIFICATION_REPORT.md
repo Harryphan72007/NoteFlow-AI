@@ -2,7 +2,7 @@
 
 Updated: 2026-07-18
 
-Status: **REAL CORE WORKFLOW VERIFIED; SECONDARY UI AND DOCKER INCOMPLETE**
+Status: **REAL CORE WORKFLOW VERIFIED; SECONDARY UI INCOMPLETE**
 
 ## Verified
 
@@ -13,6 +13,7 @@ Status: **REAL CORE WORKFLOW VERIFIED; SECONDARY UI AND DOCKER INCOMPLETE**
 - WebM/Opus browser-audio conversion to mono 16 kHz WAV.
 - Frontend browse, drag/drop, camera-file selection, microphone recording, ASR upload, OCR upload, manual note, customer, document, and task flows.
 - Full customer-linked workflow produced real ASR text, real OCR text, Ollama key points, risk `red/50.0`, and a visible note.
+- Official Qwen3-ASR-0.6B CPU mode produced a real transcript in 11.30 seconds standalone and passed the backend endpoint.
 
 ## Regression Summary
 
@@ -25,10 +26,9 @@ Status: **REAL CORE WORKFLOW VERIFIED; SECONDARY UI AND DOCKER INCOMPLETE**
 
 ## Not Complete
 
-- Docker verification is blocked because Docker is absent.
 - Secondary screens retain embedded data/local actions.
 - Trusted authentication/authorization is not implemented.
-- CPU-only Mega-ASR cold start is too slow for routine interactive use.
+- Full 1.7B Mega-ASR is optional; the CPU default is Qwen3-ASR-0.6B without the incompatible 1.7B LoRA/router.
 - Real multi-page PDF OCR and PostgreSQL runtime were not tested.
 
-Evidence: `repair/logs/phase1_mega_asr.log`, `phase2_ocr.log`, `phase3_ollama.log`, `phase4_docker.log`, `phase5_8_end_to_end.log`, `phase7_safety.log`, and `verification/evidence`.
+Docker is not required. Evidence is in `repair/logs` and `verification/evidence`.

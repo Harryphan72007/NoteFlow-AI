@@ -5,11 +5,11 @@
   "pass": true,
   "body": {
     "document_ids": [
-      "doc_b72c10a405d3",
-      "doc_73a11e277f22"
+      "doc_5300aeaa4a54",
+      "doc_ef689449e997"
     ],
-    "reference_document_id": "doc_b72c10a405d3",
-    "hypothesis_document_id": "doc_73a11e277f22",
+    "reference_document_id": "doc_5300aeaa4a54",
+    "hypothesis_document_id": "doc_ef689449e997",
     "wer": 0.6,
     "cer": 0.8695652173913043,
     "missing_words": [],

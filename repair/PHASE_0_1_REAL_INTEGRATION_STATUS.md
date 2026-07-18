@@ -15,6 +15,10 @@ Updated: 2026-07-18
 
 Status: **REAL_TESTED**
 
+- CPU default: official `Qwen3-ASR-0.6B`, also documented in the Qwen3-ASR family model card shipped with the project.
+- Lightweight standalone timing: load 3.48s, inference 7.82s, total 11.30s.
+- Lightweight backend test: HTTP 200 with a real transcript and `mega_asr_features=false`.
+- Full optional mode: Qwen3-ASR-1.7B plus Mega-ASR LoRA and audio-quality router.
 - Runtime: dedicated `mega-asr` Conda environment; never NoteFlow's venv.
 - Weights: Qwen3-ASR-1.7B, Mega-ASR LoRA, and audio-quality router under `D:\Mega-ASR\Mega-ASR\ckpt\Mega-ASR`.
 - Standalone transcript: `I said, give me a price, and they said, no.`
@@ -45,6 +49,6 @@ Status: **REAL_TESTED**
 
 ## Docker
 
-Status: **BLOCKED**
+Status: **NOT REQUIRED**
 
-Docker Desktop and the Docker CLI are genuinely absent. Installation requires manual/admin action. No compose health claim is made.
+The user explicitly chose normal local execution. Docker is removed from acceptance criteria and is not an error or blocker.

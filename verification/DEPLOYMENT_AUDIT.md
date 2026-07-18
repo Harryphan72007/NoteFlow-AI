@@ -1,48 +1,25 @@
 # Deployment Audit
 
-## Local Development
+Updated: 2026-07-18
 
-| Check | Result | Evidence |
-|---|---|---|
-| Backend dependencies installed | PASS | `.venv` exists and pytest runs |
-| Backend tests | PASS | `workflow_commands.json` |
-| Frontend dependencies installed | PASS | `pnpm run build` succeeds |
-| Frontend build | PASS | `workflow_commands.json` |
-| Database migration upgrade | PASS | Alembic terminal output |
-| Database migration downgrade | PASS | Alembic terminal output |
-| Frontend dev render | PASS | `frontend_dashboard.png` |
-| Health endpoint | PASS | API audit `health.json` |
+## Normal Local Execution
 
-## Docker
+| Check | Result |
+|---|---|
+| Backend dependencies | PASS |
+| Backend tests | PASS: 12 |
+| Frontend dependencies/build | PASS: 2220 modules |
+| Database migrations | PASS: upgrade/downgrade |
+| Health endpoint | PASS |
+| Qwen3-ASR-0.6B CPU | PASS: 11.30s standalone |
+| PaddleOCR | PASS |
+| Ollama qwen3:4b | PASS |
 
-Status: **BLOCKED_BY_ENVIRONMENT**
+Docker is explicitly not required. The supported run mode is the local Python backend plus Vite frontend.
 
-Command:
+## Remaining Deployment Risks
 
-```powershell
-docker --version
-```
-
-Actual:
-
-```text
-docker : The term 'docker' is not recognized
-```
-
-Manual verification commands:
-
-```powershell
-Copy-Item .env.example .env
-docker compose build
-docker compose up -d
-docker compose ps
-docker compose logs backend
-Invoke-RestMethod http://127.0.0.1:8000/health
-```
-
-## Deployment Risks
-
-- Real model files are not mounted or verified.
-- Docker image build may fail or produce large images once real OCR/ASR dependencies are added.
-- Frontend container can serve UI, but UI is not wired to backend.
-- Persistent volume behavior was not tested in Docker.
+- ASR still starts a subprocess and reloads the 0.6B model per request.
+- PostgreSQL runtime and migration of an existing production database were not tested.
+- Development text fallbacks should be disabled for production use.
+- Authentication, rate limiting, and service supervision are not implemented.

@@ -12,7 +12,11 @@
       },
       "asr": {
         "loaded": false,
-        "model": "Mega-ASR",
+        "model": "Qwen3-ASR-0.6B",
+        "model_family": "Qwen3-ASR",
+        "variant": "0.6B",
+        "mega_asr_lora": false,
+        "quality_router": false,
         "device": "cpu",
         "dtype": "float32",
         "available": true,

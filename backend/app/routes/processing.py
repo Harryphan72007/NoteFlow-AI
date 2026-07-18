@@ -57,8 +57,11 @@ async def transcribe(
         metadata.update(
             {
                 "real_inference": True,
+                "model": result.get("model", settings.asr_model_mode),
+                "model_family": result.get("model_family", "Mega-ASR"),
                 "route_source": result.get("route_source"),
                 "use_lora": result.get("use_lora"),
+                "mega_asr_features": result.get("mega_asr_features", True),
                 "degraded_probability": result.get("degraded_prob"),
             }
         )

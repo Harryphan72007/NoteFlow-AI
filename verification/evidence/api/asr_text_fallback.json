@@ -4,8 +4,8 @@
   "expected_status": 200,
   "pass": true,
   "body": {
-    "document_id": "doc_b72c10a405d3",
-    "customer_id": "cust_64e87d7f4f6f",
+    "document_id": "doc_5300aeaa4a54",
+    "customer_id": "cust_c433436bac52",
     "source_type": "audio",
     "source_name": "audio_fallback.txt",
     "original_filename": "audio_fallback.txt",
@@ -17,7 +17,7 @@
     "average_confidence": 1.0,
     "segments": [
       {
-        "id": "seg_8f7932090e35",
+        "id": "seg_e94b11c5665f",
         "start": 0.0,
         "end": 2.0,
         "text": "Take 5 mg once daily.",
@@ -27,13 +27,13 @@
     ],
     "pages": [],
     "metadata": {
-      "model": "Mega-ASR",
+      "model": "Qwen3-ASR-0.6B",
       "device": "cpu",
       "dtype": "float32",
-      "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\audio\\2509bd23f92f48d68f41b33ff95f2720_audio_fallback.txt",
+      "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\audio\\3f6a9c0bd4574bf288b22295f394222e_audio_fallback.txt",
       "warning": "Text fallback used for ASR endpoint; no real audio model inference was run."
     },
-    "created_at": "2026-07-18T08:28:00.641580",
-    "updated_at": "2026-07-18T08:28:00.641580"
+    "created_at": "2026-07-18T08:59:02.638096",
+    "updated_at": "2026-07-18T08:59:02.638096"
   }
 }

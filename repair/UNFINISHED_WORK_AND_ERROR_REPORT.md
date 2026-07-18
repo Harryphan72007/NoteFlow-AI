@@ -13,12 +13,13 @@ Updated: 2026-07-18
 
 ## Unfinished Or Blocked
 
-1. Docker compose verification is blocked because Docker Desktop is not installed.
-2. Mega-ASR CPU cold start is slow. The successful integrated run took about ten minutes; an earlier contention-heavy run exceeded 30 minutes. The timeout is now 3600 seconds, but GPU deployment or a persistent model service is recommended.
-3. Dashboard metrics, processing queue, service-health detail, Compare, Batch, History, Settings, ASR Review, and OCR Review still contain embedded demonstration data or local-only actions.
-4. Caller identity is not authenticated. Customer ownership checks work when `customer_id` context is supplied, but the API does not establish trusted user/customer identity.
-5. Real multi-page PDF OCR, PostgreSQL runtime, Docker restart persistence, and production migration with existing data were not exercised.
-6. Development `.txt` ASR/OCR fallback remains enabled by default and should be disabled in production.
-7. The frontend build retains a 669.90 kB chunk-size warning.
-8. The test suite retains 104 timezone-naive `datetime.utcnow()` deprecation warnings.
+1. Dashboard metrics, processing queue, service-health detail, Compare, Batch, History, Settings, ASR Review, and OCR Review still contain embedded demonstration data or local-only actions.
+2. Caller identity is not authenticated. Customer ownership checks work when `customer_id` context is supplied, but the API does not establish trusted user/customer identity.
+3. Real multi-page PDF OCR, PostgreSQL runtime, and production migration with existing data were not exercised.
+4. Development `.txt` ASR/OCR fallback remains enabled by default and should be disabled in production.
+5. The frontend build retains a 669.90 kB chunk-size warning.
+6. The test suite retains 104 timezone-naive `datetime.utcnow()` deprecation warnings.
+7. The lightweight 0.6B model does not use Mega-ASR's released LoRA/router. Full Mega-ASR remains optional because those adaptation weights target the 1.7B backbone.
+8. The 0.6B backend still loads a model subprocess per request; measured standalone time is 11.30s and the backend test completed in under one minute, but it is not a persistent low-latency service.
 
+Docker is not required and is not an unfinished item.

@@ -3,24 +3,24 @@ from __future__ import annotations
 import importlib.util
 
 from ..config import settings
+from .asr import asr_runtime_requirements, using_small_cpu_model
 
 
 def asr_status() -> dict:
-    required = (
-        settings.mega_asr_python,
-        settings.mega_asr_root / "infer.py",
-        settings.mega_asr_ckpt_dir / "Qwen3-ASR-1.7B",
-        settings.mega_asr_ckpt_dir / "mega-asr-merged",
-        settings.mega_asr_ckpt_dir / "audio_quality_router" / "best_acc_model.safetensors",
-    )
+    required = asr_runtime_requirements()
     available = all(path.exists() for path in required)
+    small_mode = using_small_cpu_model()
     return {
         "loaded": False,
         "model": settings.asr_model_mode,
+        "model_family": "Qwen3-ASR" if small_mode else "Mega-ASR",
+        "variant": "0.6B" if small_mode else "1.7B",
+        "mega_asr_lora": not small_mode,
+        "quality_router": not small_mode,
         "device": settings.mega_asr_device,
         "dtype": settings.asr_dtype,
         "available": available,
-        "reason": None if available else "Mega-ASR environment, source, or checkpoints are missing.",
+        "reason": None if available else "The configured ASR environment, runner, or checkpoint is missing.",
     }
 
 

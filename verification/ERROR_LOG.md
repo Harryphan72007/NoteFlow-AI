@@ -12,11 +12,11 @@ Updated: 2026-07-18
 - **ERR-007 Ollama fallback-only:** `qwen3:4b` structured client verified.
 - **ERR-008 Browser WebM decode failure:** `imageio-ffmpeg` transcodes to mono 16 kHz WAV; conversion passed.
 - **ERR-009 Numba cache permission:** cache redirected to `data/models/numba_cache`; import and full E2E passed.
-- **ERR-010 30-minute ASR timeout under contention:** default raised to 3600 seconds; successful integrated run completed.
+- **ERR-010 Heavy 1.7B ASR on CPU:** resolved for normal use by defaulting to official Qwen3-ASR-0.6B; 11.30s standalone and backend HTTP 200.
+- **ERR-004 Docker unavailable:** closed as NOT_REQUIRED by user direction.
 
 ## Open
 
-- **ERR-004 Docker unavailable:** BLOCKED; Docker Desktop/CLI absent.
 - **ERR-011 Static secondary UI:** dashboard/review/compare/batch/history/settings are not fully API-backed.
 - **ERR-012 No trusted authentication context:** ownership checks depend on caller-supplied customer context.
-- **ERR-013 CPU latency:** subprocess model reload remains slow.
+- **ERR-013 Repeated model startup:** 0.6B reloads per request; persistent worker remains an optimization.

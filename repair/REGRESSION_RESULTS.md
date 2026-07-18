@@ -12,6 +12,9 @@ Updated: 2026-07-18
 | Combined workflow verifier | pytest and frontend build both passed | PASS |
 | Standalone Mega-ASR | non-empty real transcript | PASS |
 | Backend Mega-ASR | HTTP 200, real metadata and segment | PASS |
+| Lightweight ASR standalone | Qwen3-ASR-0.6B; load 3.48s, infer 7.82s, total 11.30s | PASS |
+| Lightweight ASR backend | HTTP 200; correct transcript; LoRA/router honestly disabled | PASS |
+| Lightweight full E2E rerun | ASR -> OCR -> Ollama -> risk red/50 -> note | PASS |
 | Standalone/backend OCR | expected medication/allergy text and persisted blocks | PASS |
 | OCR accuracy | WER 0.000000, CER 0.000000 | PASS |
 | Ollama structured JSON | strict schema with `qwen3:4b` | PASS |
@@ -21,6 +24,6 @@ Updated: 2026-07-18
 | Real E2E | ASR -> OCR -> Ollama -> risk 50/red -> note | PASS |
 | Frontend note visibility | `Real Integration Clinical Note` found once | PASS |
 | Visual structure | 1280x720 before/after; mean pixel delta 4.5814/255 | PASS_WITH_CAPTURE_LIMITATION |
-| Docker compose | CLI/Desktop absent | BLOCKED |
+| Docker compose | Removed from acceptance criteria | NOT_REQUIRED |
 
 Evidence is in `repair/logs/phase*.log` and `verification/evidence`.

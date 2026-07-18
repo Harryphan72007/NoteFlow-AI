@@ -45,6 +45,9 @@ Status: **REAL_TESTED**
 - Model: `qwen3:4b`.
 - NoteFlow's structured client returned schema-conformant JSON.
 - Adversarial document instructions could not add a `hacked` field or fabricated diagnosis.
+- Health now reports service reachability, configured-model installation, and loaded state separately.
+- `OLLAMA_KEEP_ALIVE=30m` keeps the model resident; measured short key-points latency was 13.75s after restart and 8.85s warm.
+- The backend is real-tested, but existing frontend actions are not yet wired to `/api/ai/*`.
 - Evidence: `repair/logs/phase3_ollama.log`, `repair/logs/phase7_safety.log`.
 
 ## Docker

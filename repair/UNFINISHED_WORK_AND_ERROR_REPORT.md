@@ -10,6 +10,8 @@ Updated: 2026-07-18
 - Browse, drag/drop, camera-file selection, microphone recording, ASR upload, and OCR upload are wired.
 - Upload magic-byte validation, ownership regressions, OCR quality flags, and WER/CER checks pass.
 - A customer-linked audio -> ASR -> OCR -> Ollama -> risk score -> note workflow passed.
+- Browser upload retest confirmed real OCR and ASR uploads return HTTP 200, persist, and appear in Documents with no browser console errors.
+- Ollama health now distinguishes service availability, installed-model availability, and loaded state; requests keep `qwen3:4b` resident for 30 minutes by default.
 
 ## Unfinished Or Blocked
 
@@ -21,6 +23,8 @@ Updated: 2026-07-18
 6. The test suite retains 104 timezone-naive `datetime.utcnow()` deprecation warnings.
 7. The lightweight 0.6B model does not use Mega-ASR's released LoRA/router. Full Mega-ASR remains optional because those adaptation weights target the 1.7B backbone.
 8. The 0.6B backend still loads a model subprocess per request; measured standalone time is 11.30s and the backend test completed in under one minute, but it is not a persistent low-latency service.
+9. The frontend upload flow stops after ASR/OCR and does not call any `/api/ai/*` endpoint. Ollama tools are real backend APIs, but no existing frontend control is wired to them.
+10. CPU LLM generation is still visibly slow. A pre-repair cold request took 28.11s; with the keep-alive repair, the first request after restart took 13.75s and the next resident-model request took 8.85s.
 
 Docker is not required and is not an unfinished item.
 
@@ -35,6 +39,8 @@ Docker is not required and is not an unfinished item.
 - Batch has no backend job endpoint. History export and Settings/model-management endpoints are missing.
 - Audio upload copy says 500 MB while the backend enforces 100 MB.
 - The real browser microphone UI is wired, and WebM conversion is tested, but a fresh live-microphone recording was not captured after the conversion repair.
+- Upload itself succeeds, but the unchanged UI offers little feedback during the blocking CPU inference request and navigates to Documents only after completion. This can look like a failed upload.
+- The frontend has no API client functions or handlers for summarize, translate, key points, task extraction, or note formatting. The existing `Run Clinical Check` button is also not connected.
 
 ### ASR
 
@@ -60,6 +66,13 @@ Docker is not required and is not an unfinished item.
 - No rate limiting, TLS termination, malware scanning, or encryption-at-rest workflow is implemented.
 - SQLite is verified; PostgreSQL and migration of existing production data are not.
 - Development text fallbacks are enabled by default.
+
+### Ollama
+
+- `qwen3:4b` is installed and returns correct structured clinical output; it is not missing.
+- The upload UI does not automatically run Ollama, and no existing frontend AI-tool action calls `/api/ai/*`.
+- `OLLAMA_KEEP_ALIVE` now defaults to `30m`; live health reports `model_available` and `loaded` separately.
+- Warm measured latency is 8.85s for a short key-points request on this CPU. Longer documents and schemas will take longer.
 
 ### Warnings And Test Limits
 

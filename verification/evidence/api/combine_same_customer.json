@@ -4,8 +4,8 @@
   "expected_status": 200,
   "pass": true,
   "body": {
-    "document_id": "doc_5bfcbb426abb",
-    "customer_id": "cust_c433436bac52",
+    "document_id": "doc_0c8f49f12cf0",
+    "customer_id": "cust_efb113b63068",
     "source_type": "combined",
     "source_name": "Combined clinical document",
     "original_filename": null,
@@ -19,12 +19,12 @@
     "pages": [],
     "metadata": {
       "source_document_ids": [
-        "doc_5300aeaa4a54",
-        "doc_ef689449e997",
-        "doc_7b1ad805a51c"
+        "doc_7e62fabfb83b",
+        "doc_94764c9316cc",
+        "doc_316539aaf60f"
       ]
     },
-    "created_at": "2026-07-18T08:59:03.075787",
-    "updated_at": "2026-07-18T08:59:03.075787"
+    "created_at": "2026-07-18T09:25:29.910651",
+    "updated_at": "2026-07-18T09:25:29.910651"
   }
 }

@@ -59,6 +59,7 @@ class Settings:
     ollama_base_url: str = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
     ollama_model: str = os.getenv("OLLAMA_MODEL", "qwen3:4b")
     ollama_timeout_seconds: int = int(os.getenv("OLLAMA_TIMEOUT_SECONDS", "120"))
+    ollama_keep_alive: str = os.getenv("OLLAMA_KEEP_ALIVE", "30m")
 
     upload_dir: Path = Path(os.getenv("UPLOAD_DIR", "./data/uploads"))
     processed_dir: Path = Path(os.getenv("PROCESSED_DIR", "./data/processed"))

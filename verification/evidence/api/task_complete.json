@@ -4,8 +4,8 @@
   "expected_status": 200,
   "pass": true,
   "body": {
-    "customer_id": "cust_c433436bac52",
-    "document_id": "doc_5bfcbb426abb",
+    "customer_id": "cust_efb113b63068",
+    "document_id": "doc_0c8f49f12cf0",
     "analysis_id": null,
     "task_text": "Audit task",
     "owner": null,
@@ -14,9 +14,9 @@
     "frequency": null,
     "priority": "medium",
     "evidence": null,
-    "id": "task_5416cfa8996f",
+    "id": "task_480c99326b37",
     "status": "complete",
-    "created_at": "2026-07-18T08:59:03.300428",
-    "completed_at": "2026-07-18T08:59:03.321496"
+    "created_at": "2026-07-18T09:25:30.064048",
+    "completed_at": "2026-07-18T09:25:30.082171"
   }
 }

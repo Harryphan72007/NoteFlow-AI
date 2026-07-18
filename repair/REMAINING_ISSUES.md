@@ -9,6 +9,7 @@ Updated: 2026-07-18
 - **Review record selection:** opening a document does not load its actual backend content into ASR/OCR review.
 - **Timestamp accuracy:** ASR segment/SRT/VTT times are estimated rather than model-derived.
 - **Persistence contract:** `save_document=false` still writes a document.
+- **Frontend AI integration:** real Ollama endpoints exist, but no current frontend action invokes them and `Run Clinical Check` has no handler.
 
 ## Medium
 
@@ -26,5 +27,7 @@ Updated: 2026-07-18
 - The UI advertises 500 MB audio while the backend limit is 100 MB.
 - The in-process ASR lock does not coordinate multiple server workers.
 - A post-repair live microphone capture still needs human/device permission verification.
+- CPU Ollama latency remains about 8.85s warm for a short structured request; the 30-minute keep-alive removes repeated model reloads but not generation time.
+- Upload requests are synchronous and expose little visible progress, so successful long-running OCR/ASR can appear stalled.
 
 Docker is intentionally not used and is not a remaining issue.

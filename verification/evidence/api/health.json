@@ -33,7 +33,10 @@
       "ollama": {
         "available": true,
         "model": "qwen3:4b",
-        "base_url": "http://localhost:11434"
+        "model_available": true,
+        "loaded": true,
+        "base_url": "http://localhost:11434",
+        "keep_alive": "30m"
       }
     }
   }

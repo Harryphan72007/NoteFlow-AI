@@ -23,6 +23,8 @@ Health check:
 Invoke-RestMethod http://127.0.0.1:8000/health
 ```
 
+`http://127.0.0.1:8000/health` is the backend status endpoint, not the application UI.
+
 ## Local Frontend
 
 ```powershell
@@ -31,6 +33,8 @@ cd Frontend
 & 'C:\Users\Dell\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback\pnpm.cmd' run build
 & 'C:\Users\Dell\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback\pnpm.cmd' run dev
 ```
+
+Open the application at `http://127.0.0.1:5173/`.
 
 ## Tests
 
@@ -48,17 +52,8 @@ $env:DATABASE_URL='sqlite:///./data/migration_test.db'
 
 ## Model Notes
 
-Real Mega-ASR/Qwen3-ASR and PaddleOCR inference is not bundled or verified in this workspace. The `/api/transcribe` and `/api/ocr` endpoints accept `.txt` fallback uploads for API testing and return warnings in metadata. Install and configure real model runtimes before claiming real ASR/OCR verification.
+The normal CPU configuration uses the official Qwen3-ASR-0.6B checkpoint through the Mega-ASR/Qwen runtime. The full Mega-ASR 1.7B LoRA/router path remains available through configuration, but is intentionally not the CPU default. PaddleOCR uses the local PP-OCRv6 detection and recognition checkpoints.
 
-Ollama is checked through `/health`; deterministic local fallbacks are used for simple AI utility endpoints when Ollama is unavailable.
+Ollama uses local `qwen3:4b` structured generation. `/health` reports service reachability, configured-model availability, and whether the model is currently loaded. `OLLAMA_KEEP_ALIVE=30m` avoids repeated cold model reloads; lower it if memory pressure is more important than latency.
 
-## Docker
-
-```powershell
-Copy-Item .env.example .env
-docker compose build
-docker compose up -d
-docker compose ps
-```
-
-Docker build/deployment has been scaffolded but was not verified in this run.
+Docker is not required for the supported local workflow.

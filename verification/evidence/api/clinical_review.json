@@ -4,7 +4,7 @@
   "expected_status": 200,
   "pass": true,
   "body": {
-    "analysis_id": "analysis_a80d5fb75132",
+    "analysis_id": "analysis_fd1180580c2a",
     "risk_level": "red",
     "risk_score": 70.0,
     "score_components": {
@@ -15,7 +15,7 @@
     },
     "issues": [
       {
-        "id": "issue_2b1f144b159b",
+        "id": "issue_c539e8285e56",
         "type": "missing_medication_route",
         "severity": "high",
         "title": "Medication route missing",
@@ -27,7 +27,7 @@
         "status": "open"
       },
       {
-        "id": "issue_5891f6d0c03e",
+        "id": "issue_2cbe80b20fbf",
         "type": "missing_medication_duration",
         "severity": "medium",
         "title": "Medication duration missing",
@@ -39,7 +39,7 @@
         "status": "open"
       },
       {
-        "id": "issue_f31337bc512d",
+        "id": "issue_0edab15e7169",
         "type": "possible_allergy_conflict",
         "severity": "critical",
         "title": "Possible allergy conflict",
@@ -54,7 +54,7 @@
     ],
     "tasks": [
       {
-        "id": "task_cb4b56f2d5b8",
+        "id": "task_b3ad35984c88",
         "task_text": "Monitor tomorrow.",
         "status": "pending",
         "priority": "medium",

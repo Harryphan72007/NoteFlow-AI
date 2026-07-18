@@ -4,8 +4,8 @@
   "expected_status": 200,
   "pass": true,
   "body": {
-    "document_id": "doc_ec06ddcd2e8c",
-    "customer_id": "cust_b7955b3813ac",
+    "document_id": "doc_170dae785f31",
+    "customer_id": "cust_502f09667683",
     "source_type": "manual_text",
     "source_name": "Audit manual B",
     "original_filename": null,
@@ -20,7 +20,7 @@
     "metadata": {
       "input_method": "manual"
     },
-    "created_at": "2026-07-18T08:59:02.519166",
-    "updated_at": "2026-07-18T08:59:02.519166"
+    "created_at": "2026-07-18T09:25:29.652560",
+    "updated_at": "2026-07-18T09:25:29.652560"
   }
 }

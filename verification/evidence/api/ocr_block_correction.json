@@ -1,0 +1,69 @@
+{
+  "name": "ocr_block_correction",
+  "status_code": 200,
+  "expected_status": 200,
+  "pass": true,
+  "body": {
+    "document_id": "doc_aa1575f2a058",
+    "customer_id": "cust_f143e3601f07",
+    "source_type": "image",
+    "source_name": "ocr_fallback.txt",
+    "original_filename": "ocr_fallback.txt",
+    "text": "Take 0.5 mg once daily.\nAllergy: Penicillin",
+    "corrected_text": "Take 0.5 mg once daily.\nAllergy: Penicillin",
+    "language": "en",
+    "status": "review-required",
+    "processing_status": "complete",
+    "average_confidence": 0.99,
+    "segments": [],
+    "pages": [
+      {
+        "id": "page_6d01a626b5bf",
+        "page_number": 1,
+        "width": 1000,
+        "height": 1400,
+        "average_confidence": 0.99,
+        "blocks": [
+          {
+            "id": "block_4cee95c9e58a",
+            "text": "Take 0.5 mg once daily.",
+            "corrected_text": "Take 0.5 mg once daily.",
+            "confidence": 0.99,
+            "bounding_box": [
+              64.0,
+              80.0,
+              900.0,
+              110.0
+            ],
+            "reading_order": 0,
+            "region_type": "paragraph"
+          },
+          {
+            "id": "block_049836c6702e",
+            "text": "Allergy: Penicillin",
+            "corrected_text": null,
+            "confidence": 0.99,
+            "bounding_box": [
+              64.0,
+              116.0,
+              900.0,
+              146.0
+            ],
+            "reading_order": 1,
+            "region_type": "paragraph"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "ocr_engine": "paddleocr",
+      "language": "en",
+      "preprocess": true,
+      "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\ocr\\519b8c6aa8b7474084b7875450607361_ocr_fallback.txt",
+      "quality_warnings": [],
+      "warning": "Text fallback used for OCR endpoint; no real OCR model inference was run."
+    },
+    "created_at": "2026-07-18T05:04:56.039541",
+    "updated_at": "2026-07-18T05:04:56.287395"
+  }
+}

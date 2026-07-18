@@ -1,0 +1,26 @@
+{
+  "name": "customer_update",
+  "status_code": 200,
+  "expected_status": 200,
+  "pass": true,
+  "body": {
+    "customer_code": "PT-AUDIT-A",
+    "full_name": "Audit Customer A",
+    "date_of_birth": "1980-01-01",
+    "gender": null,
+    "phone": "555-0100",
+    "email": null,
+    "address": null,
+    "patient_id": "AUD-A",
+    "medical_record_number": null,
+    "allergies": "Penicillin",
+    "existing_conditions": null,
+    "emergency_contact": null,
+    "notes": null,
+    "id": "cust_f143e3601f07",
+    "status": "active",
+    "created_at": "2026-07-18T05:04:55.356879",
+    "updated_at": "2026-07-18T05:04:55.528600",
+    "duplicate_warning": false
+  }
+}

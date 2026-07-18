@@ -1,0 +1,9 @@
+{
+  "name": "asr_invalid_extension",
+  "status_code": 415,
+  "expected_status": 415,
+  "pass": true,
+  "body": {
+    "detail": "Unsupported file extension: exe"
+  }
+}

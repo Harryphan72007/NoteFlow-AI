@@ -1,0 +1,7 @@
+{
+  "name": "export_txt",
+  "status_code": 200,
+  "expected_status": 200,
+  "pass": true,
+  "body": "[audio - audio_fallback.txt]\r\nTake 0.5 mg once daily.\r\n\r\n[image - ocr_fallback.txt]\r\nTake 0.5 mg once daily.\r\nAllergy: Penicillin\r\n\r\n[manual_text - Audit manual A]\r\nPatient has chest pain. Started amoxicillin. Monitor tomorrow."
+}

@@ -1,0 +1,26 @@
+{
+  "name": "manual_document_a",
+  "status_code": 200,
+  "expected_status": 200,
+  "pass": true,
+  "body": {
+    "document_id": "doc_754790e02f71",
+    "customer_id": "cust_f143e3601f07",
+    "source_type": "manual_text",
+    "source_name": "Audit manual A",
+    "original_filename": null,
+    "text": "Patient has chest pain. Started amoxicillin. Monitor tomorrow.",
+    "corrected_text": null,
+    "language": "en",
+    "status": "complete",
+    "processing_status": "complete",
+    "average_confidence": null,
+    "segments": [],
+    "pages": [],
+    "metadata": {
+      "input_method": "manual"
+    },
+    "created_at": "2026-07-18T05:04:55.665124",
+    "updated_at": "2026-07-18T05:04:55.665124"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "export_vtt",
+  "status_code": 422,
+  "expected_status": 422,
+  "pass": true,
+  "body": {
+    "detail": "SRT/VTT export is only available for audio documents"
+  }
+}

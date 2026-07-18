@@ -1,0 +1,2 @@
+Temperature 39.1 C
+Allergy: Penicillin

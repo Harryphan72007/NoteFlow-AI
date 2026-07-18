@@ -1,0 +1,30 @@
+[
+  {
+    "name": "pytest_backend",
+    "command": [
+      "D:\\NoteFlow AI\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "backend\\tests",
+      "-q"
+    ],
+    "cwd": "D:\\NoteFlow AI",
+    "returncode": 0,
+    "stdout": "..........                                                               [100%]\n============================== warnings summary ===============================\nbackend/tests/test_api_workflow.py: 58 warnings\nbackend/tests/test_security_repairs.py: 43 warnings\n  D:\\NoteFlow AI\\.venv\\Lib\\site-packages\\sqlalchemy\\sql\\schema.py:3624: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    return util.wrap_callable(lambda ctx: fn(), fn)  # type: ignore\n\nbackend/tests/test_api_workflow.py::test_customer_document_compare_clinical_task_export_workflow\nbackend/tests/test_security_repairs.py::test_wrong_customer_cannot_update_task_or_issue\n  D:\\NoteFlow AI\\backend\\app\\routes\\clinical_review.py:104: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    issue.resolved_at = datetime.utcnow()\n\nbackend/tests/test_api_workflow.py::test_customer_document_compare_clinical_task_export_workflow\n  D:\\NoteFlow AI\\backend\\app\\routes\\tasks.py:70: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).\n    task.completed_at = datetime.utcnow()\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n10 passed, 104 warnings in 5.73s\n",
+    "stderr": "",
+    "pass": true
+  },
+  {
+    "name": "frontend_build",
+    "command": [
+      "C:\\Users\\Dell\\.cache\\codex-runtimes\\codex-primary-runtime\\dependencies\\bin\\fallback\\pnpm.cmd",
+      "run",
+      "build"
+    ],
+    "cwd": "D:\\NoteFlow AI\\Frontend",
+    "returncode": 0,
+    "stdout": "vite v6.3.5 building for production...\ntransforming...\n\u00e2\u0153\u201c 2220 modules transformed.\nrendering chunks...\ncomputing gzip size...\ndist/index.html                   0.81 kB \u00e2\u201d\u201a gzip:   0.46 kB\ndist/assets/index-LMWOICv7.css  100.77 kB \u00e2\u201d\u201a gzip:  16.31 kB\ndist/assets/index-C1G9Et_H.js   666.73 kB \u00e2\u201d\u201a gzip: 185.20 kB\n\u00e2\u0153\u201c built in 8.54s\n",
+    "stderr": "[WARN] The \"pnpm\" field in package.json is no longer read by pnpm. The following keys were ignored: \"pnpm.overrides\". See https://pnpm.io/settings for the new home of each setting.\n$ vite build\n\n(!) Some chunks are larger than 500 kB after minification. Consider:\n- Using dynamic import() to code-split the application\n- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks\n- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.\n",
+    "pass": true
+  }
+]

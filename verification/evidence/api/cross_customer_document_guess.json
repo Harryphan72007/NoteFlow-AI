@@ -1,0 +1,9 @@
+{
+  "name": "cross_customer_document_guess",
+  "status_code": 403,
+  "expected_status": 403,
+  "pass": true,
+  "body": {
+    "detail": "Access denied"
+  }
+}

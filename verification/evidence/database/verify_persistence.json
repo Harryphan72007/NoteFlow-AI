@@ -1,0 +1,10 @@
+{
+  "customer_id": "cust_2b85ae2f3a18",
+  "document_id": "doc_9ca1fdd05e14",
+  "counts_after_reopen": {
+    "customers": 1,
+    "documents": 1,
+    "audit_logs": 2
+  },
+  "pass": true
+}

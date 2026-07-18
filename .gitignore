@@ -1,0 +1,15 @@
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.env
+dist/
+build/
+ckpt/
+*.db
+.pytest_cache/
+.pnpm-store/
+repair/logs/
+backend/storage/
+Frontend/.vite/
+*.log

@@ -1,0 +1,24 @@
+{
+  "name": "compare_numeric",
+  "status_code": 200,
+  "expected_status": 200,
+  "pass": true,
+  "body": {
+    "document_ids": [
+      "doc_2511eb1b5e12",
+      "doc_aa1575f2a058"
+    ],
+    "reference_document_id": "doc_2511eb1b5e12",
+    "hypothesis_document_id": "doc_aa1575f2a058",
+    "wer": 0.6,
+    "cer": 0.8695652173913043,
+    "missing_words": [],
+    "extra_words": [
+      "allergy",
+      ":",
+      "penicillin"
+    ],
+    "replacements": [],
+    "mismatches": []
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "customer_duplicate_code",
+  "status_code": 409,
+  "expected_status": 409,
+  "pass": true,
+  "body": {
+    "detail": "Customer code already exists"
+  }
+}

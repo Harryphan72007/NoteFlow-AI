@@ -1,0 +1,9 @@
+{
+  "name": "issue_ignore_without_reason",
+  "status_code": 422,
+  "expected_status": 422,
+  "pass": true,
+  "body": {
+    "detail": "A reason is required when ignoring an issue"
+  }
+}

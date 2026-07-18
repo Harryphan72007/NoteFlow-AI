@@ -1,0 +1,33 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - .env
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      DATABASE_URL: sqlite:////app/data/noteflow.db
+      UPLOAD_DIR: /app/data/uploads
+      PROCESSED_DIR: /app/data/processed
+      EXPORT_DIR: /app/data/exports
+    volumes:
+      - noteflow_data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Frontend/Dockerfile
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+    restart: unless-stopped
+
+volumes:
+  noteflow_data:

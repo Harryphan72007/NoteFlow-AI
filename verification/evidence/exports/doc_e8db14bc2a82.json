@@ -1,0 +1,24 @@
+{
+  "document_id": "doc_e8db14bc2a82",
+  "customer_id": "cust_8d267c12f313",
+  "source_type": "combined",
+  "source_name": "Combined clinical document",
+  "original_filename": null,
+  "text": "[audio - audio_fallback.txt]\nTake 0.5 mg once daily.\n\n[image - ocr_fallback.txt]\nTake 0.5 mg once daily.\nAllergy: Penicillin\n\n[manual_text - Audit manual A]\nPatient has chest pain. Started amoxicillin. Monitor tomorrow.",
+  "corrected_text": null,
+  "language": "en",
+  "status": "complete",
+  "processing_status": "complete",
+  "average_confidence": null,
+  "segments": [],
+  "pages": [],
+  "metadata": {
+    "source_document_ids": [
+      "doc_95a154416192",
+      "doc_25702e587e87",
+      "doc_6139e2c62755"
+    ]
+  },
+  "created_at": "2026-07-18T03:46:51.868953",
+  "updated_at": "2026-07-18T03:46:51.868953"
+}

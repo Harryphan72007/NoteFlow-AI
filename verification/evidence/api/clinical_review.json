@@ -1,0 +1,66 @@
+{
+  "name": "clinical_review",
+  "status_code": 200,
+  "expected_status": 200,
+  "pass": true,
+  "body": {
+    "analysis_id": "analysis_897434110fad",
+    "risk_level": "red",
+    "risk_score": 70.0,
+    "score_components": {
+      "critical": 40,
+      "high": 20,
+      "medium": 10,
+      "low": 0
+    },
+    "issues": [
+      {
+        "id": "issue_67250eb492d2",
+        "type": "missing_medication_route",
+        "severity": "high",
+        "title": "Medication route missing",
+        "message": "A medication is documented without a route.",
+        "evidence": [
+          "Started amoxicillin"
+        ],
+        "recommendation": "Document the medication route.",
+        "status": "open"
+      },
+      {
+        "id": "issue_6f517e49176d",
+        "type": "missing_medication_duration",
+        "severity": "medium",
+        "title": "Medication duration missing",
+        "message": "A medication is documented without a duration.",
+        "evidence": [
+          "Started amoxicillin"
+        ],
+        "recommendation": "Document duration or clarify that duration is not applicable.",
+        "status": "open"
+      },
+      {
+        "id": "issue_b38a762c33b5",
+        "type": "possible_allergy_conflict",
+        "severity": "critical",
+        "title": "Possible allergy conflict",
+        "message": "Amoxicillin appears in the document while penicillin allergy information is also present.",
+        "evidence": [
+          "amoxicillin",
+          "penicillin"
+        ],
+        "recommendation": "Verify the medication plan against documented allergy information.",
+        "status": "open"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "task_edad5a015f0b",
+        "task_text": "Monitor tomorrow.",
+        "status": "pending",
+        "priority": "medium",
+        "evidence": "Monitor tomorrow."
+      }
+    ],
+    "summary": "Documentation-support review only. Clinician approval is required before use."
+  }
+}

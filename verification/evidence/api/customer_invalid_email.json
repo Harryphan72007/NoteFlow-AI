@@ -1,0 +1,22 @@
+{
+  "name": "customer_invalid_email",
+  "status_code": 422,
+  "expected_status": 422,
+  "pass": true,
+  "body": {
+    "detail": [
+      {
+        "type": "value_error",
+        "loc": [
+          "body",
+          "email"
+        ],
+        "msg": "Value error, Invalid email address",
+        "input": "not-an-email",
+        "ctx": {
+          "error": {}
+        }
+      }
+    ]
+  }
+}

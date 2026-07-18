@@ -1,0 +1,10 @@
+.venv
+node_modules
+Frontend/node_modules
+Frontend/dist
+data
+__pycache__
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.git

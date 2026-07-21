@@ -56,4 +56,4 @@ The normal CPU configuration uses the official Qwen3-ASR-0.6B checkpoint through
 
 Ollama uses local `qwen3:4b` structured generation. `/health` reports service reachability, configured-model availability, and whether the model is currently loaded. `OLLAMA_KEEP_ALIVE=30m` avoids repeated cold model reloads; lower it if memory pressure is more important than latency.
 
-Docker is not required for the supported local workflow.
+Docker support was removed on 2026-07-18. The supported workflow runs directly via the project virtual environment and pnpm.

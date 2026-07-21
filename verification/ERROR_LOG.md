@@ -13,7 +13,7 @@ Updated: 2026-07-18
 - **ERR-008 Browser WebM decode failure:** `imageio-ffmpeg` transcodes to mono 16 kHz WAV; conversion passed.
 - **ERR-009 Numba cache permission:** cache redirected to `data/models/numba_cache`; import and full E2E passed.
 - **ERR-010 Heavy 1.7B ASR on CPU:** resolved for normal use by defaulting to official Qwen3-ASR-0.6B; 11.30s standalone and backend HTTP 200.
-- **ERR-004 Docker unavailable:** closed as NOT_REQUIRED by user direction.
+- **ERR-004 Container deployment:** removed from the supported scope on 2026-07-18; local venv + pnpm is the run mode.
 
 ## Open
 

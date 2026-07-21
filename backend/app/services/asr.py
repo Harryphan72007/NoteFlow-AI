@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import ast
+import json
 import os
 import subprocess
 import threading
+import wave
 from pathlib import Path
 
 import imageio_ffmpeg
@@ -18,6 +20,8 @@ class ASRServiceError(RuntimeError):
 
 
 _INFERENCE_LOCK = threading.Lock()
+_SMALL_WORKER: subprocess.Popen[str] | None = None
+_SMALL_WORKER_LOCK = threading.Lock()
 
 
 def using_small_cpu_model() -> bool:
@@ -98,7 +102,17 @@ def _transcode_to_wav(path: Path) -> Path:
     return target
 
 
-def transcribe_audio(path: Path) -> dict:
+def _duration_seconds(path: Path) -> float | None:
+    if path.suffix.lower() == ".wav":
+        try:
+            with wave.open(str(path), "rb") as audio:
+                return audio.getnframes() / max(audio.getframerate(), 1)
+        except (OSError, wave.Error):
+            return None
+    return None
+
+
+def transcribe_audio(path: Path, language: str = "auto") -> dict:
     missing = [str(item) for item in asr_runtime_requirements() if not item.exists()]
     if missing:
         raise ASRServiceError("model_loading", f"ASR runtime is incomplete: {missing}")
@@ -110,6 +124,9 @@ def transcribe_audio(path: Path) -> dict:
         if path.suffix.lower() != ".wav":
             converted_path = _transcode_to_wav(path)
             inference_path = converted_path
+        duration = _duration_seconds(inference_path)
+        if duration is not None and duration > settings.asr_max_duration_seconds:
+            raise ASRServiceError("duration_exceeded", f"Audio exceeds the {settings.asr_max_duration_seconds}-second limit")
         cache_dir = settings.mega_asr_numba_cache_dir.resolve()
         cache_dir.mkdir(parents=True, exist_ok=True)
         process_env = os.environ.copy()
@@ -127,6 +144,11 @@ def transcribe_audio(path: Path) -> dict:
                 "--max_new_tokens",
                 str(settings.asr_max_new_tokens),
             ]
+            if language and language != "auto":
+                command.extend(["--language", language])
+            result = _transcribe_small_worker(inference_path, language, process_env)
+            if result is not None:
+                return result
         else:
             command = [
                 str(settings.mega_asr_python),
@@ -163,3 +185,31 @@ def transcribe_audio(path: Path) -> dict:
         if converted_path is not None:
             converted_path.unlink(missing_ok=True)
         _INFERENCE_LOCK.release()
+
+
+def _transcribe_small_worker(path: Path, language: str, process_env: dict[str, str]) -> dict | None:
+    global _SMALL_WORKER
+    with _SMALL_WORKER_LOCK:
+        if _SMALL_WORKER is None or _SMALL_WORKER.poll() is not None:
+            command = [str(settings.mega_asr_python), str(Path(__file__).with_name("asr_small_runner.py")), "--audio", str(path.resolve()), "--model_path", str(settings.qwen_asr_small_model_dir), "--device_map", settings.mega_asr_device, "--max_new_tokens", str(settings.asr_max_new_tokens), "--server"]
+            _SMALL_WORKER = subprocess.Popen(command, cwd=settings.mega_asr_root, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=process_env, bufsize=1)
+        assert _SMALL_WORKER.stdin is not None and _SMALL_WORKER.stdout is not None
+        try:
+            _SMALL_WORKER.stdin.write(json.dumps({"audio": str(path.resolve()), "language": language if language != "auto" else None}) + "\n")
+            _SMALL_WORKER.stdin.flush()
+            for _ in range(20):
+                line = _SMALL_WORKER.stdout.readline().strip()
+                if not line:
+                    break
+                try:
+                    result = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if "error" in result:
+                    raise ASRServiceError("transcription_error", result["error"])
+                if result.get("text"):
+                    return result
+        except (BrokenPipeError, OSError):
+            _SMALL_WORKER.kill()
+            _SMALL_WORKER = None
+    return None

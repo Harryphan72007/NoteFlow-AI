@@ -5,7 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import fitz
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
 from paddleocr import PaddleOCR
 
 from ..config import settings
@@ -100,14 +100,28 @@ def _pdf_pages(path: Path) -> list[tuple[Path, int, int]]:
         document.close()
 
 
-def recognize_document(path: Path, suffix: str, language: str) -> dict:
+def _preprocess_image(path: Path) -> Path:
+    target = settings.processed_dir / f"ocr_preprocessed_{uuid4().hex}.png"
+    with Image.open(path) as image:
+        gray = ImageOps.grayscale(image)
+        normalized = ImageOps.autocontrast(gray)
+        denoised = normalized.filter(ImageFilter.MedianFilter(size=3))
+        sharpened = ImageEnhance.Sharpness(denoised).enhance(1.5)
+        sharpened.save(target)
+    return target
+
+
+def recognize_document(path: Path, suffix: str, language: str, preprocess: bool = True) -> dict:
     requested_language = settings.ocr_language if language == "auto" else language
+    if requested_language != "en":
+        raise OCRServiceError("Only English OCR models are configured; use language='en' or 'auto'")
     pages = _pdf_pages(path) if suffix == ".pdf" else [(path, *_image_dimensions(path))]
     output_pages: list[dict] = []
     all_scores: list[float] = []
     with _ENGINE_LOCK:
         for page_number, (image_path, width, height) in enumerate(pages, start=1):
-            result = _predict(image_path, requested_language)
+            processed_path = _preprocess_image(image_path) if preprocess else image_path
+            result = _predict(processed_path, requested_language)
             scores = result["scores"]
             all_scores.extend(scores)
             warnings: list[str] = []
@@ -121,7 +135,7 @@ def recognize_document(path: Path, suffix: str, language: str) -> dict:
             output_pages.append(
                 {
                     "page_number": page_number,
-                    "image_path": image_path,
+                    "image_path": processed_path,
                     "width": width,
                     "height": height,
                     "text": result["text"],

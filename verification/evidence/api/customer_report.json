@@ -5,15 +5,15 @@
   "pass": true,
   "body": {
     "customer": {
-      "id": "cust_efb113b63068",
+      "id": "cust_5fc755b8edaa",
       "customer_code": "PT-AUDIT-A",
       "full_name": "Audit Customer A",
       "status": "active"
     },
     "documents": [
       {
-        "document_id": "doc_316539aaf60f",
-        "customer_id": "cust_efb113b63068",
+        "document_id": "doc_cd00b06b251e",
+        "customer_id": "cust_5fc755b8edaa",
         "source_type": "manual_text",
         "source_name": "Audit manual A",
         "original_filename": null,
@@ -28,12 +28,12 @@
         "metadata": {
           "input_method": "manual"
         },
-        "created_at": "2026-07-18T09:25:29.589687",
-        "updated_at": "2026-07-18T09:25:29.589687"
+        "created_at": "2026-07-18T10:10:45.803909",
+        "updated_at": "2026-07-18T10:10:45.803909"
       },
       {
-        "document_id": "doc_7e62fabfb83b",
-        "customer_id": "cust_efb113b63068",
+        "document_id": "doc_b5e09728b3cb",
+        "customer_id": "cust_5fc755b8edaa",
         "source_type": "audio",
         "source_name": "audio_fallback.txt",
         "original_filename": "audio_fallback.txt",
@@ -45,7 +45,7 @@
         "average_confidence": 1.0,
         "segments": [
           {
-            "id": "seg_6b83ca7d1be6",
+            "id": "seg_ae076f16aa5a",
             "start": 0.0,
             "end": 2.0,
             "text": "Take 5 mg once daily.",
@@ -58,15 +58,16 @@
           "model": "Qwen3-ASR-0.6B",
           "device": "cpu",
           "dtype": "float32",
-          "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\audio\\618db64975d24e1f9e6a8cd2c11ce38d_audio_fallback.txt",
+          "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\audio\\e7dcc6d25a1a48019aa33b889198453c_audio_fallback.txt",
+          "timestamp_source": "estimated",
           "warning": "Text fallback used for ASR endpoint; no real audio model inference was run."
         },
-        "created_at": "2026-07-18T09:25:29.729034",
-        "updated_at": "2026-07-18T09:25:29.848661"
+        "created_at": "2026-07-18T10:10:46.263392",
+        "updated_at": "2026-07-18T10:10:46.649762"
       },
       {
-        "document_id": "doc_94764c9316cc",
-        "customer_id": "cust_efb113b63068",
+        "document_id": "doc_1564f9d658c0",
+        "customer_id": "cust_5fc755b8edaa",
         "source_type": "image",
         "source_name": "ocr_fallback.txt",
         "original_filename": "ocr_fallback.txt",
@@ -79,14 +80,14 @@
         "segments": [],
         "pages": [
           {
-            "id": "page_c9e14661cc28",
+            "id": "page_82ad1debcd6f",
             "page_number": 1,
             "width": 1000,
             "height": 1400,
             "average_confidence": 0.99,
             "blocks": [
               {
-                "id": "block_942b3f42c9e2",
+                "id": "block_8f67a754d65d",
                 "text": "Take 0.5 mg once daily.",
                 "corrected_text": "Take 0.5 mg once daily.",
                 "confidence": 0.99,
@@ -100,7 +101,7 @@
                 "region_type": "paragraph"
               },
               {
-                "id": "block_01e0783bd2d5",
+                "id": "block_453c8b76a0a6",
                 "text": "Allergy: Penicillin",
                 "corrected_text": null,
                 "confidence": 0.99,
@@ -120,16 +121,16 @@
           "ocr_engine": "paddleocr",
           "language": "en",
           "preprocess": true,
-          "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\ocr\\d1c2dcdfdae443ccad68933cb933e9d4_ocr_fallback.txt",
+          "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\ocr\\e3d81eb329974e8f9ad097e9d8a72afd_ocr_fallback.txt",
           "quality_warnings": [],
           "warning": "Text fallback used for OCR endpoint; no real OCR model inference was run."
         },
-        "created_at": "2026-07-18T09:25:29.747735",
-        "updated_at": "2026-07-18T09:25:29.882649"
+        "created_at": "2026-07-18T10:10:46.431858",
+        "updated_at": "2026-07-18T10:10:46.825296"
       },
       {
-        "document_id": "doc_0c8f49f12cf0",
-        "customer_id": "cust_efb113b63068",
+        "document_id": "doc_7c695243fa4b",
+        "customer_id": "cust_5fc755b8edaa",
         "source_type": "combined",
         "source_name": "Combined clinical document",
         "original_filename": null,
@@ -143,18 +144,18 @@
         "pages": [],
         "metadata": {
           "source_document_ids": [
-            "doc_7e62fabfb83b",
-            "doc_94764c9316cc",
-            "doc_316539aaf60f"
+            "doc_b5e09728b3cb",
+            "doc_1564f9d658c0",
+            "doc_cd00b06b251e"
           ]
         },
-        "created_at": "2026-07-18T09:25:29.910651",
-        "updated_at": "2026-07-18T09:25:29.910651"
+        "created_at": "2026-07-18T10:10:46.979818",
+        "updated_at": "2026-07-18T10:10:46.979818"
       }
     ],
     "analyses": [
       {
-        "id": "analysis_fd1180580c2a",
+        "id": "analysis_12205699a076",
         "risk_level": "red",
         "risk_score": 70.0,
         "result": {
@@ -212,13 +213,13 @@
     ],
     "tasks": [
       {
-        "id": "task_b3ad35984c88",
+        "id": "task_d17d44bc5eea",
         "task_text": "Monitor tomorrow.",
         "status": "pending",
         "priority": "medium"
       },
       {
-        "id": "task_480c99326b37",
+        "id": "task_28ee04b688dd",
         "task_text": "Audit task",
         "status": "complete",
         "priority": "medium"

@@ -15,7 +15,7 @@ Updated: 2026-07-18
 | PaddleOCR | PASS |
 | Ollama qwen3:4b | PASS |
 
-Docker is explicitly not required. The supported run mode is the local Python backend plus Vite frontend.
+Container deployment is not supported. The project runs directly through the documented Python virtual environment and pnpm commands.
 
 ## Remaining Deployment Risks
 

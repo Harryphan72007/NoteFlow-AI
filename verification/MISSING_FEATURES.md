@@ -15,4 +15,4 @@ Updated: 2026-07-18
 | Strict pixel-golden browser suite | Current screenshot is resampled | Low |
 
 Real ASR, OCR, Ollama, MIME validation, browser recording conversion, and core upload flows are no longer missing.
-Docker is intentionally out of scope.
+Container deployment was removed on 2026-07-18; local venv + pnpm execution is the supported mode.

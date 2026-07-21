@@ -4,8 +4,8 @@
   "expected_status": 200,
   "pass": true,
   "body": {
-    "document_id": "doc_94764c9316cc",
-    "customer_id": "cust_efb113b63068",
+    "document_id": "doc_1564f9d658c0",
+    "customer_id": "cust_5fc755b8edaa",
     "source_type": "image",
     "source_name": "ocr_fallback.txt",
     "original_filename": "ocr_fallback.txt",
@@ -18,14 +18,14 @@
     "segments": [],
     "pages": [
       {
-        "id": "page_c9e14661cc28",
+        "id": "page_82ad1debcd6f",
         "page_number": 1,
         "width": 1000,
         "height": 1400,
         "average_confidence": 0.99,
         "blocks": [
           {
-            "id": "block_942b3f42c9e2",
+            "id": "block_8f67a754d65d",
             "text": "Take 0.5 mg once daily.",
             "corrected_text": "Take 0.5 mg once daily.",
             "confidence": 0.99,
@@ -39,7 +39,7 @@
             "region_type": "paragraph"
           },
           {
-            "id": "block_01e0783bd2d5",
+            "id": "block_453c8b76a0a6",
             "text": "Allergy: Penicillin",
             "corrected_text": null,
             "confidence": 0.99,
@@ -59,11 +59,11 @@
       "ocr_engine": "paddleocr",
       "language": "en",
       "preprocess": true,
-      "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\ocr\\d1c2dcdfdae443ccad68933cb933e9d4_ocr_fallback.txt",
+      "stored_file_path": "D:\\NoteFlow AI\\verification\\evidence\\uploads\\ocr\\e3d81eb329974e8f9ad097e9d8a72afd_ocr_fallback.txt",
       "quality_warnings": [],
       "warning": "Text fallback used for OCR endpoint; no real OCR model inference was run."
     },
-    "created_at": "2026-07-18T09:25:29.747735",
-    "updated_at": "2026-07-18T09:25:29.882649"
+    "created_at": "2026-07-18T10:10:46.431858",
+    "updated_at": "2026-07-18T10:10:46.825296"
   }
 }

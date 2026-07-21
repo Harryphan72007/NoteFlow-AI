@@ -1,19 +1,21 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from .. import models
 from ..database import get_db
 from ..schemas import CompareRequest
 from ..services.metrics import compare_texts
+from ..services.auth import scoped_customer
 
 
 router = APIRouter(tags=["comparison"])
 
 
 @router.post("/compare")
-def compare_documents(payload: CompareRequest, db: Session = Depends(get_db)):
+def compare_documents(payload: CompareRequest, db: Session = Depends(get_db), request: Request = None):
+    payload.customer_id = scoped_customer(request, payload.customer_id)
     documents = [db.get(models.Document, document_id) for document_id in payload.document_ids]
     if any(document is None for document in documents):
         raise HTTPException(status_code=404, detail="Document not found")

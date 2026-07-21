@@ -39,7 +39,7 @@ def _timestamp(seconds: float, sep: str) -> str:
 
 
 def to_srt(document: Document) -> str:
-    lines = []
+    lines = ["NOTE: timestamps are estimated from transcript length; model timestamps were not available.", ""]
     for idx, segment in enumerate(sorted(document.segments, key=lambda item: item.sequence_index), start=1):
         lines.extend([
             str(idx),
@@ -51,7 +51,7 @@ def to_srt(document: Document) -> str:
 
 
 def to_vtt(document: Document) -> str:
-    lines = ["WEBVTT", ""]
+    lines = ["WEBVTT", "", "NOTE timestamps are estimated from transcript length; model timestamps were not available.", ""]
     for segment in sorted(document.segments, key=lambda item: item.sequence_index):
         lines.extend([
             f"{_timestamp(segment.start_seconds, '.')} --> {_timestamp(segment.end_seconds, '.')}",

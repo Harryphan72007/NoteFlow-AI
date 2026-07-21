@@ -25,6 +25,15 @@ import {
   listCustomers,
   listDocuments,
   listTasks,
+  getDashboard,
+  getDocument,
+  getDocumentPageImage,
+  listHistory,
+  compareDocuments,
+  runClinicalReview,
+  runAiAction,
+  finalizeDocument,
+  updateDocumentText,
   ocrFile,
   transcribeFile,
 } from "../api/client";
@@ -424,24 +433,29 @@ function TopBar({ title, subtitle, actions, breadcrumbs }: {
 // ─── Dashboard ────────────────────────────────────────────────
 
 function DashboardScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
+  const [dashboard, setDashboard] = useState<Awaited<ReturnType<typeof getDashboard>> | null>(null);
+  const refresh = () => getDashboard().then(setDashboard).catch(() => setDashboard(null));
+  useEffect(() => { refresh(); }, []);
+  const liveQueue = (dashboard?.queue ?? []).map(item => ({ ...item, customer: item.name, doc: item.type, type: item.type === "audio" ? "asr" : "ocr", priority: "medium", progress: item.status === "complete" ? 100 : 35, model: "backend" }));
+  const liveReviews = liveQueue;
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
         title="Dashboard"
-        subtitle="Monday, January 15, 2024"
+        subtitle={dashboard ? new Date(dashboard.date).toLocaleDateString() : "Loading live dashboard"}
         actions={
           <>
-            <Btn variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />}>Refresh</Btn>
+            <Btn variant="outline" size="sm" icon={<RefreshCw className="w-3.5 h-3.5" />} onClick={refresh}>Refresh</Btn>
             <Btn variant="primary" size="sm" icon={<Plus className="w-3.5 h-3.5" />} onClick={() => onNavigate("new-processing")}>New Processing</Btn>
           </>
         }
       />
       <div className="flex-1 overflow-y-auto p-6 space-y-5">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <KPICard label="Documents Today"  value="24"    sub="↑ 4 from yesterday" icon={<FileText   className="w-5 h-5" />} trend="+20%" color="blue" />
-          <KPICard label="Pending Reviews"  value="7"     sub="3 high priority"    icon={<AlertCircle className="w-5 h-5" />}             color="amber" />
-          <KPICard label="Processing Queue" value="3"     sub="Avg wait 4 min"     icon={<Clock       className="w-5 h-5" />}             color="teal" />
-          <KPICard label="Total Processed"  value="1,847" sub="Since Jan 2024"     icon={<TrendingUp  className="w-5 h-5" />} trend="+12%" color="green" />
+          <KPICard label="Documents Today" value={String(dashboard?.documents_today ?? 0)} sub="Live backend count" icon={<FileText className="w-5 h-5" />} color="blue" />
+          <KPICard label="Pending Reviews" value={String(dashboard?.pending_reviews ?? 0)} sub="Live backend count" icon={<AlertCircle className="w-5 h-5" />} color="amber" />
+          <KPICard label="Processing Queue" value={String(dashboard?.processing_queue ?? 0)} sub="Live backend count" icon={<Clock className="w-5 h-5" />} color="teal" />
+          <KPICard label="Total Processed" value={String(dashboard?.total_processed ?? 0)} sub="Persisted documents" icon={<TrendingUp className="w-5 h-5" />} color="green" />
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
@@ -454,7 +468,7 @@ function DashboardScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
               <Badge variant="outline">This Week</Badge>
             </div>
             <ResponsiveContainer width="100%" height={160}>
-              <AreaChart data={activityData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+              <AreaChart data={dashboard?.activity ?? []} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gAsr" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%"  stopColor="#1E3A5F" stopOpacity={0.15} />
@@ -515,10 +529,10 @@ function DashboardScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
           <Card>
             <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
               <h3 className="text-sm font-semibold text-foreground">Processing Queue</h3>
-              <Badge variant="blue">{queueItems.length} active</Badge>
+              <Badge variant="blue">{liveQueue.length} active</Badge>
             </div>
             <div className="divide-y divide-border">
-              {queueItems.map(item => (
+              {liveQueue.map(item => (
                 <div key={item.id} className="px-5 py-4">
                   <div className="flex items-center justify-between mb-2">
                     <div>
@@ -550,7 +564,7 @@ function DashboardScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
               <Btn variant="ghost" size="sm" onClick={() => onNavigate("history")}>View all</Btn>
             </div>
             <div className="divide-y divide-border">
-              {pendingReviews.map(r => (
+              {liveReviews.map(r => (
                 <div key={r.id} className="px-5 py-4 flex items-start justify-between gap-3 hover:bg-muted/20 transition-colors cursor-pointer">
                   <div className="flex items-start gap-3">
                     <div className={cn("w-8 h-8 rounded-md flex items-center justify-center flex-shrink-0 mt-0.5",
@@ -581,7 +595,7 @@ function DashboardScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
 // ─── Customers ────────────────────────────────────────────────
 
 function CustomersScreen({
-  customerRows = customers,
+  customerRows = [],
   onCreateCustomer,
   onNavigate,
 }: {
@@ -835,7 +849,7 @@ function CustomerWorkspaceScreen({ onNavigate }: { onNavigate: (s: Screen) => vo
 // ─── New Processing ───────────────────────────────────────────
 
 function NewProcessingScreen({
-  customerRows = customers,
+  customerRows = [],
   onSaveManualNote,
   onProcessed,
 }: {
@@ -844,12 +858,16 @@ function NewProcessingScreen({
   onProcessed?: (document: ApiDocument) => Promise<void>;
 }) {
   const [mode, setMode] = useState<"record" | "upload-audio" | "scan" | "upload-pdf" | "note">("record");
-  const [customer, setCustomer] = useState(customerRows[0]?.backendId ?? customerRows[0]?.id ?? "PT-001847");
+  const [customer, setCustomer] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [noteTitle, setNoteTitle] = useState("Visit Note — January 15, 2024");
   const [noteText, setNoteText] = useState("Patient presents with ongoing management of Type 2 Diabetes Mellitus. HbA1c at last check was 7.2%. Current medications include Metformin 1000mg BD and Empagliflozin 10mg OD. Blood pressure 128/82 mmHg today. No new symptoms.");
+  const [asrLanguage, setAsrLanguage] = useState("en");
   const [savingNote, setSavingNote] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [processingStage, setProcessingStage] = useState<"idle" | "uploading" | "transcribing" | "extracting text" | "done">("idle");
+  const [aiResult, setAiResult] = useState<string>("");
+  const [aiError, setAiError] = useState<string>("");
   const [audioFile, setAudioFile] = useState<File>();
   const [documentFile, setDocumentFile] = useState<File>();
   const [recordingSeconds, setRecordingSeconds] = useState(0);
@@ -860,13 +878,17 @@ function NewProcessingScreen({
   const mediaStreamRef = useRef<MediaStream>();
   const recordedChunksRef = useRef<Blob[]>([]);
   const shouldUploadRecordingRef = useRef(false);
+  const selectableCustomers = useMemo(
+    () => customerRows.filter(c => c.status === "active" && Boolean(c.backendId)),
+    [customerRows],
+  );
 
   useEffect(() => {
-    const validSelection = customerRows.some(c => (c.backendId ?? c.id) === customer);
+    const validSelection = selectableCustomers.some(c => c.backendId === customer);
     if (!validSelection) {
-      setCustomer(customerRows[0] ? customerRows[0].backendId ?? customerRows[0].id : "");
+      setCustomer(selectableCustomers[0]?.backendId ?? "");
     }
-  }, [customer, customerRows]);
+  }, [customer, selectableCustomers]);
 
   useEffect(() => {
     if (!isRecording) return;
@@ -889,9 +911,13 @@ function NewProcessingScreen({
 
   const submitTranscription = async (selectedFile = audioFile) => {
     if (!selectedFile || processing) return;
+    if (!customer) { reportError("Select a customer before starting transcription."); return; }
     setProcessing(true);
+    setProcessingStage("uploading");
     try {
-      const document = await transcribeFile(selectedFile, customer, "en");
+      setProcessingStage("transcribing");
+      const document = await transcribeFile(selectedFile, customer, asrLanguage);
+      setProcessingStage("done");
       await onProcessed?.(document);
     } catch (error) {
       reportError(error);
@@ -902,9 +928,13 @@ function NewProcessingScreen({
 
   const submitOcr = async () => {
     if (!documentFile || processing) return;
+    if (!customer) { reportError("Select a customer before starting OCR processing."); return; }
     setProcessing(true);
+    setProcessingStage("uploading");
     try {
+      setProcessingStage("extracting text");
       const document = await ocrFile(documentFile, customer, "en");
+      setProcessingStage("done");
       await onProcessed?.(document);
     } catch (error) {
       reportError(error);
@@ -962,12 +992,29 @@ function NewProcessingScreen({
 
   const saveManualNote = async () => {
     if (!onSaveManualNote || savingNote) return;
+    if (!customer) { reportError("Select a customer before saving this note."); return; }
     setSavingNote(true);
     try {
       await onSaveManualNote({ customerId: customer, sourceName: noteTitle, text: noteText });
     } finally {
       setSavingNote(false);
     }
+  };
+
+  const runAi = async (action: "summarize" | "key-points" | "format-note") => {
+    setAiError("");
+    try { setAiResult(JSON.stringify(await runAiAction(action, noteText), null, 2)); }
+    catch (error) { setAiError(error instanceof Error ? error.message : "AI action failed"); }
+  };
+
+  const runClinicalCheck = async () => {
+    setAiError("");
+    if (!customer) { setAiError("Select a customer before running the clinical check."); return; }
+    try {
+      const document = await createManualDocument({ customer_id: customer, source_name: noteTitle, text: noteText });
+      const result = await runClinicalReview([document.document_id]);
+      setAiResult(JSON.stringify(result, null, 2));
+    } catch (error) { setAiError(error instanceof Error ? error.message : "Clinical review failed"); }
   };
 
   const modes = [
@@ -992,7 +1039,8 @@ function NewProcessingScreen({
                 onChange={e => setCustomer(e.target.value)}
                 className="w-full pl-9 pr-8 py-2 text-sm bg-input-background border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring appearance-none"
               >
-                {customerRows.filter(c => c.status === "active").map(c => (
+                {!selectableCustomers.length && <option value="" disabled>No active customers available</option>}
+                {selectableCustomers.map(c => (
                   <option key={c.id} value={c.backendId ?? c.id}>{c.id} — {c.name}</option>
                 ))}
               </select>
@@ -1081,7 +1129,7 @@ function NewProcessingScreen({
                 >
                   <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                   <p className="text-sm font-medium text-foreground">Drop audio file here</p>
-                  <p className="text-xs text-muted-foreground mt-1">MP3, WAV, M4A, OGG · up to 500 MB</p>
+                  <p className="text-xs text-muted-foreground mt-1">MP3, WAV, M4A, OGG · up to 100 MB</p>
                   <Btn variant="outline" size="sm" className="mt-3" onClick={() => audioInputRef.current?.click()}>Browse Files</Btn>
                 </div>
                 {[
@@ -1090,8 +1138,15 @@ function NewProcessingScreen({
                 ].map(f => (
                   <div key={f.label} className="flex items-center gap-4">
                     <label className="text-sm text-muted-foreground w-32 flex-shrink-0">{f.label}</label>
-                    <select className="flex-1 text-sm bg-input-background border border-border rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-ring">
-                      {f.opts.map(o => <option key={o}>{o}</option>)}
+                    <select
+                      value={f.label === "Language" ? asrLanguage : undefined}
+                      onChange={f.label === "Language" ? event => setAsrLanguage(event.target.value) : undefined}
+                      className="flex-1 text-sm bg-input-background border border-border rounded-md px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      {f.opts.map(o => {
+                        const value = o.includes("Mandarin") ? "zh-CN" : o.includes("en-US") ? "en-US" : "en";
+                        return <option key={o} value={f.label === "Language" ? value : o}>{o}</option>;
+                      })}
                     </select>
                   </div>
                 ))}
@@ -1179,10 +1234,15 @@ function NewProcessingScreen({
                 </div>
                 <div className="flex gap-3">
                   <Btn variant="primary" icon={<Check className="w-4 h-4" />} onClick={saveManualNote} disabled={savingNote}>Save Note</Btn>
-                  <Btn variant="outline" icon={<Stethoscope className="w-4 h-4" />}>Run Clinical Check</Btn>
+                  <Btn variant="outline" icon={<Stethoscope className="w-4 h-4" />} onClick={runClinicalCheck}>Run Clinical Check</Btn>
                 </div>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {(["summarize", "key-points", "format-note"] as const).map(action => <Btn key={action} variant="ghost" size="sm" onClick={() => runAi(action)}>{action}</Btn>)}
+                </div>
+                {(aiResult || aiError) && <pre className={cn("text-xs whitespace-pre-wrap rounded border p-3", aiError ? "text-red-700 border-red-200 bg-red-50" : "text-foreground bg-muted/30")}>{aiError || aiResult}</pre>}
               </div>
             )}
+            {processing && <div className="mt-4 text-sm text-primary">{processingStage}...</div>}
           </Card>
         </div>
       </div>
@@ -1192,24 +1252,29 @@ function NewProcessingScreen({
 
 // ─── ASR Review ───────────────────────────────────────────────
 
-function ASRReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
+function ASRReviewScreen({ documentId, onNavigate }: { documentId?: string; onNavigate: (s: Screen) => void }) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0.35);
   const [editMode, setEditMode] = useState(false);
+  const [document, setDocument] = useState<ApiDocument | null>(null);
+  useEffect(() => { if (documentId) getDocument(documentId).then(setDocument).catch(() => setDocument(null)); }, [documentId]);
 
-  const transcript = [
+  const sampleTranscript = [
     "Patient presents with ongoing management of Type 2 Diabetes Mellitus. HbA1c at last check was 7.2%, which represents a slight improvement from the previous 7.6% recorded in October. Current medications include Metformin one thousand milligrams twice daily and Empagliflozin ten milligrams once daily.",
     "Blood pressure today is 128 over 82 millimetres of mercury — within acceptable range. Patient reports no episodes of hypoglycaemia in the past month. Weight stable at 84 kilograms. No new symptoms reported.",
     "Plan: Continue current regimen. Repeat HbA1c in three months. Refer to dietitian for further dietary counselling. Patient education regarding foot care provided.",
   ];
 
-  const timestamps = [
+  const sampleTimestamps = [
     { time: "0:00", text: "Patient presents with ongoing management...", warn: false },
     { time: "0:12", text: "HbA1c at last check was 7.2%...",            warn: false },
     { time: "0:28", text: "Current medications include Metformin...",    warn: true  },
     { time: "0:44", text: "Blood pressure today is 128 over 82...",      warn: true  },
     { time: "1:02", text: "Plan: Continue current regimen...",           warn: false },
   ];
+  const transcript = document?.text ? document.text.split(/\n+/).filter(Boolean) : [];
+  const timestamps = (document?.segments ?? []).map(segment => ({ time: `${Math.floor(segment.start / 60)}:${String(Math.floor(segment.start % 60)).padStart(2, "0")}`, text: segment.text, warn: (segment.confidence ?? 1) < 0.8 }));
+  const acceptTranscript = async () => { if (documentId) await finalizeDocument(documentId); };
 
   const elapsed = Math.floor(progress * 82);
 
@@ -1290,7 +1355,7 @@ function ASRReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
             </div>
             <div className="flex items-center justify-between px-5 py-3 border-t border-border bg-muted/20">
               <span className="text-xs text-muted-foreground">127 words · Source: ASR · Not yet verified</span>
-              <Btn variant="primary" size="sm" icon={<Check className="w-3.5 h-3.5" />}>Accept Transcript</Btn>
+              <Btn variant="primary" size="sm" icon={<Check className="w-3.5 h-3.5" />} onClick={acceptTranscript}>Accept Transcript</Btn>
             </div>
           </Card>
         </div>
@@ -1332,45 +1397,140 @@ function ASRReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
 
 // ─── OCR Review ───────────────────────────────────────────────
 
-function OCRReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
+function OCRReviewScreen({ documentId, onNavigate }: { documentId?: string; onNavigate: (s: Screen) => void }) {
   const [page, setPage] = useState(0);
   const [editMode, setEditMode] = useState(false);
+  const [document, setDocument] = useState<ApiDocument | null>(null);
+  const [editedText, setEditedText] = useState("");
+  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(Boolean(documentId));
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
 
-  const rawText = `PRESCRIPTION
+  useEffect(() => {
+    let cancelled = false;
+    setPage(0);
+    setDocument(null);
+    setImageUrls({});
+    setEditedText("");
+    setError("");
+    setMessage("");
+    if (!documentId) {
+      setLoading(false);
+      setError("No OCR document was selected.");
+      return () => { cancelled = true; };
+    }
+    setLoading(true);
+    getDocument(documentId)
+      .then(value => {
+        if (cancelled) return;
+        setDocument(value);
+        setEditedText(value.corrected_text ?? value.text ?? "");
+      })
+      .catch(reason => {
+        if (!cancelled) setError(reason instanceof Error ? reason.message : "Unable to load the OCR document.");
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [documentId]);
 
-Patient: Sarah Chen
-DOB: 14/03/1978
-Date: 12/01/2024
+  useEffect(() => {
+    let cancelled = false;
+    const urls: string[] = [];
+    const pages = document?.pages ?? [];
+    if (!pages.length || !document) return () => { cancelled = true; };
+    Promise.all(pages.map(async currentPage => {
+      try {
+        const url = await getDocumentPageImage(document.document_id, currentPage.page_number);
+        urls.push(url);
+        return [currentPage.id, url] as const;
+      } catch {
+        return null;
+      }
+    })).then(entries => {
+      if (cancelled) return;
+      setImageUrls(Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => Boolean(entry))));
+    });
+    return () => {
+      cancelled = true;
+      urls.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, [document]);
 
-Medication: Metformin Hydrochloride
-Strength: 1000mg
-Form: Tablet
-Directions: ONE tablet TWICE daily with meals
-Quantity: 60 tablets · Repeats: 5
+  const pages = document?.pages ?? [];
+  const currentPage = pages[page] ?? pages[0];
+  const blocks = currentPage?.blocks ?? [];
+  const rawText = document?.corrected_text ?? document?.text ?? "";
+  const sourceLabel = document?.original_filename ?? document?.source_name ?? "OCR document";
+  const metadata = document?.metadata ?? {};
+  const modelLabel = typeof metadata.ocr_engine === "string" ? metadata.ocr_engine : "OCR";
+  const pageConfidence = currentPage?.average_confidence ?? document?.average_confidence;
+  const confidencePercent = (value?: number | null) => value == null ? null : (value <= 1 ? value * 100 : value);
+  const formatConfidence = (value?: number | null) => {
+    const percent = confidencePercent(value);
+    return percent == null ? "—" : `${percent.toFixed(1)}%`;
+  };
+  const fields = blocks.map((block, index) => ({
+    label: block.region_type || `Block ${index + 1}`,
+    value: block.corrected_text ?? block.text,
+    conf: confidencePercent(block.confidence ?? pageConfidence ?? document?.average_confidence),
+  }));
 
-Prescriber: Dr. A. Kumar
-Provider No: 1234567A`;
+  const handleEditToggle = async () => {
+    if (!document) return;
+    if (!editMode) {
+      setEditedText(document.corrected_text ?? document.text ?? "");
+      setError("");
+      setEditMode(true);
+      return;
+    }
+    setSaving(true);
+    setError("");
+    try {
+      const updated = await updateDocumentText(document.document_id, editedText);
+      setDocument(updated);
+      setEditedText(updated.corrected_text ?? updated.text ?? "");
+      setEditMode(false);
+      setMessage("OCR text saved.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to save OCR text.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
-  const fields = [
-    { label: "Patient Name",      value: "Sarah Chen",                      conf: 99 },
-    { label: "Date of Birth",     value: "14/03/1978",                      conf: 98 },
-    { label: "Prescription Date", value: "12/01/2024",                      conf: 97 },
-    { label: "Medication",        value: "Metformin Hydrochloride",          conf: 95 },
-    { label: "Strength",          value: "1000mg",                           conf: 91 },
-    { label: "Directions",        value: "ONE tablet TWICE daily with meals", conf: 87 },
-    { label: "Quantity",          value: "60 tablets",                       conf: 94 },
-    { label: "Repeats",           value: "5",                                conf: 99 },
-    { label: "Prescriber",        value: "Dr. A. Kumar",                     conf: 82 },
-  ];
+  const acceptOcr = async () => {
+    if (!document) return;
+    try {
+      const updated = await finalizeDocument(document.document_id);
+      setDocument(updated);
+      setMessage("OCR output accepted.");
+      setError("");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Unable to accept OCR output.");
+    }
+  };
+
+  if (!document && !loading) {
+    return (
+      <div className="flex flex-col h-full overflow-hidden">
+        <TopBar title="OCR Review" subtitle="Document unavailable" breadcrumbs={[{ label: "OCR Review" }]} />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <Card className="p-5 max-w-lg w-full"><p className="text-sm text-red-700">{error || "Unable to load the selected OCR document."}</p></Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <TopBar
         title="OCR Review"
-        subtitle="Prescription Scan — Jan 12, 2024 · OCR-v2 · 87.1% avg confidence"
+        subtitle={loading ? "Loading OCR document…" : `${sourceLabel} · ${modelLabel} · ${formatConfidence(document?.average_confidence)} avg confidence`}
         breadcrumbs={[
           { label: "Customers", onClick: () => onNavigate("customers") },
-          { label: "Sarah Chen", onClick: () => onNavigate("customer-workspace") },
+          { label: document?.customer_id ?? "Unassigned", onClick: () => onNavigate("customer-workspace") },
           { label: "OCR Review" }
         ]}
         actions={
@@ -1384,48 +1544,46 @@ Provider No: 1234567A`;
       <div className="flex-1 overflow-hidden flex">
         {/* Thumbnails */}
         <div className="w-20 border-r border-border bg-muted/20 flex flex-col items-center py-3 gap-2 flex-shrink-0 overflow-y-auto">
-          {[1, 2].map((_, i) => (
+          {pages.map((thumbnailPage, i) => (
             <button
-              key={i}
+              key={thumbnailPage.id}
               onClick={() => setPage(i)}
               className={cn("w-14 h-20 rounded border-2 bg-white flex items-center justify-center transition-all",
                 page === i ? "border-primary shadow-sm" : "border-border hover:border-primary/40"
               )}
             >
-              <div className="w-10 h-14 bg-muted/60 rounded flex flex-col gap-0.5 p-1">
-                {Array.from({ length: 6 }, (_, r) => (
-                  <div key={r} className="h-1 bg-muted-foreground/20 rounded-full" style={{ width: `${60 + r * 5}%` }} />
-                ))}
-              </div>
+              {imageUrls[thumbnailPage.id]
+                ? <img src={imageUrls[thumbnailPage.id]} alt={`Page ${thumbnailPage.page_number}`} className="w-10 h-14 object-contain" />
+                : <div className="w-10 h-14 bg-muted/60 rounded p-1 overflow-hidden text-[4px] leading-tight text-muted-foreground">{thumbnailPage.blocks.slice(0, 8).map(block => block.text).join(" ")}</div>}
             </button>
           ))}
-          <div className="text-xs text-muted-foreground mt-1">Pg {page + 1}/2</div>
+          <div className="text-xs text-muted-foreground mt-1">Pg {pages.length ? page + 1 : "—"}/{pages.length || "—"}</div>
         </div>
 
         {/* Document Preview */}
         <div className="flex-1 bg-muted/20 flex items-center justify-center p-6 overflow-hidden">
           <div className="w-full max-w-xs bg-white border border-border rounded-lg shadow-sm overflow-hidden flex flex-col" style={{ maxHeight: "420px" }}>
             <div className="flex items-center justify-between px-3 py-2 bg-muted/30 border-b border-border">
-              <span className="text-xs text-muted-foreground font-mono">Page {page + 1}</span>
-              <Badge variant="blue">87.1% avg</Badge>
+              <span className="text-xs text-muted-foreground font-mono">Page {currentPage?.page_number ?? "—"}</span>
+              <Badge variant="blue">{formatConfidence(pageConfidence)} avg</Badge>
             </div>
             <div className="flex-1 overflow-y-auto p-5">
-              <div className="text-center border-b border-gray-200 pb-3 mb-4">
-                <div className="text-sm font-bold text-gray-900 tracking-wide">PRESCRIPTION</div>
-              </div>
-              <div className="text-xs font-mono text-gray-700 space-y-1.5 leading-relaxed">
-                <div>Patient: <mark className="bg-blue-100 px-0.5 rounded not-italic">Sarah Chen</mark></div>
-                <div>DOB: <mark className="bg-blue-100 px-0.5 rounded not-italic">14/03/1978</mark></div>
-                <div>Date: <mark className="bg-blue-100 px-0.5 rounded not-italic">12/01/2024</mark></div>
-                <div className="mt-2 pt-2 border-t border-gray-100">Medication:</div>
-                <div><mark className="bg-emerald-100 px-0.5 rounded not-italic">Metformin Hydrochloride</mark></div>
-                <div>Strength: <mark className="bg-emerald-100 px-0.5 rounded not-italic">1000mg</mark></div>
-                <div>Directions: <mark className="bg-amber-100 px-0.5 rounded border border-amber-200 not-italic">ONE tablet TWICE daily...</mark></div>
-                <div className="mt-2 pt-2 border-t border-gray-100 text-gray-500 text-xs">60 tabs · 5 repeats</div>
-              </div>
+              {currentPage && imageUrls[currentPage.id] ? (
+                <div className="relative w-full bg-white" style={{ aspectRatio: `${currentPage.width} / ${currentPage.height}` }}>
+                  <img src={imageUrls[currentPage.id]} alt={`${sourceLabel}, page ${currentPage.page_number}`} className="absolute inset-0 w-full h-full object-contain" />
+                  {blocks.map(block => {
+                    const [x1, y1, x2, y2] = block.bounding_box;
+                    return <span key={block.id} title={block.text} className="absolute border border-primary/60 bg-primary/10 pointer-events-none" style={{ left: `${(x1 / currentPage.width) * 100}%`, top: `${(y1 / currentPage.height) * 100}%`, width: `${((x2 - x1) / currentPage.width) * 100}%`, height: `${((y2 - y1) / currentPage.height) * 100}%` }} />;
+                  })}
+                </div>
+              ) : (
+                <div className="text-xs font-mono text-gray-700 space-y-1.5 leading-relaxed">
+                  {blocks.length ? blocks.map(block => <div key={block.id}>{block.corrected_text ?? block.text}</div>) : <div className="text-muted-foreground">No OCR page image or blocks were returned.</div>}
+                </div>
+              )}
             </div>
             <div className="py-2 border-t border-border bg-muted/20 text-xs text-center text-muted-foreground">
-              Bounding boxes shown · Click field to highlight
+              {blocks.length ? "Bounding boxes shown from OCR blocks" : "No OCR blocks returned for this page"}
             </div>
           </div>
         </div>
@@ -1434,13 +1592,13 @@ Provider No: 1234567A`;
         <div className="w-80 border-l border-border bg-card flex-shrink-0 overflow-y-auto">
           <div className="px-4 py-3.5 border-b border-border flex items-center justify-between">
             <h3 className="text-sm font-semibold text-foreground">Extracted Text</h3>
-            <Btn variant={editMode ? "primary" : "outline"} size="sm" icon={<Edit2 className="w-3 h-3" />} onClick={() => setEditMode(v => !v)}>
-              {editMode ? "Done" : "Edit"}
+            <Btn variant={editMode ? "primary" : "outline"} size="sm" icon={<Edit2 className="w-3 h-3" />} onClick={handleEditToggle}>
+              {saving ? "Saving…" : editMode ? "Done" : "Edit"}
             </Btn>
           </div>
           <div className="p-4 border-b border-border">
             {editMode
-              ? <textarea className="w-full text-xs font-mono bg-input-background border border-border rounded p-3 min-h-[160px] focus:outline-none focus:ring-2 focus:ring-ring resize-none" defaultValue={rawText} />
+              ? <textarea className="w-full text-xs font-mono bg-input-background border border-border rounded p-3 min-h-[160px] focus:outline-none focus:ring-2 focus:ring-ring resize-none" value={editedText} onChange={event => setEditedText(event.target.value)} />
               : <pre className="text-xs font-mono text-foreground whitespace-pre-wrap leading-relaxed">{rawText}</pre>
             }
           </div>
@@ -1449,20 +1607,21 @@ Provider No: 1234567A`;
             <h3 className="text-sm font-semibold text-foreground">Structured Fields</h3>
           </div>
           <div className="divide-y divide-border">
-            {fields.map(f => (
-              <div key={f.label} className="px-4 py-2.5 hover:bg-muted/20 transition-colors">
+            {fields.length ? fields.map((f, index) => (
+              <div key={`${f.label}-${index}`} className="px-4 py-2.5 hover:bg-muted/20 transition-colors">
                 <div className="text-xs text-muted-foreground mb-0.5">{f.label}</div>
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium text-foreground flex-1">{f.value}</span>
                   <span className={cn("text-xs font-mono flex-shrink-0",
-                    f.conf >= 95 ? "text-emerald-700" : f.conf >= 85 ? "text-amber-700" : "text-red-700"
-                  )}>{f.conf}%</span>
+                    (f.conf ?? 0) >= 95 ? "text-emerald-700" : (f.conf ?? 0) >= 85 ? "text-amber-700" : "text-red-700"
+                  )}>{f.conf == null ? "—" : `${f.conf.toFixed(1)}%`}</span>
                 </div>
               </div>
-            ))}
+            )) : <div className="px-4 py-3 text-xs text-muted-foreground">No OCR blocks returned for this page.</div>}
           </div>
           <div className="p-4 border-t border-border">
-            <Btn variant="primary" size="sm" className="w-full justify-center" icon={<Check className="w-3.5 h-3.5" />}>Accept OCR Output</Btn>
+            {(error || message) && <p className={cn("text-xs mb-3", error ? "text-red-700" : "text-emerald-700")}>{error || message}</p>}
+            <Btn variant="primary" size="sm" className="w-full justify-center" icon={<Check className="w-3.5 h-3.5" />} onClick={acceptOcr}>Accept OCR Output</Btn>
           </div>
         </div>
       </div>
@@ -1472,9 +1631,16 @@ Provider No: 1234567A`;
 
 // ─── Compare ──────────────────────────────────────────────────
 
-function CompareScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
+function CompareScreen({ documentIds = [], onNavigate }: { documentIds?: string[]; onNavigate: (s: Screen) => void }) {
   const [view, setView] = useState<"side" | "inline">("side");
   const [actions, setActions] = useState<Record<number, "asr" | "ocr" | "flagged">>({});
+  const [comparison, setComparison] = useState<Awaited<ReturnType<typeof compareDocuments>> | null>(null);
+  const [compareError, setCompareError] = useState("");
+  const runComparison = async () => {
+    if (documentIds.length < 2) { setCompareError("Select two persisted documents to compare."); return; }
+    try { setCompareError(""); setComparison(await compareDocuments(documentIds.slice(0, 2))); }
+    catch (error) { setCompareError(error instanceof Error ? error.message : "Comparison failed"); }
+  };
 
   const mismatches = [
     { id: 0, severity: "red",   category: "Dosage",     label: "Metformin dose",     asr: "1000mg twice daily",   ocr: "100mg twice daily" },
@@ -1497,11 +1663,12 @@ function CompareScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
                 </button>
               ))}
             </div>
-            <Btn variant="primary" size="sm" icon={<Download className="w-3.5 h-3.5" />}>Export Report</Btn>
+            <Btn variant="primary" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={runComparison}>Run Comparison</Btn>
           </>
         }
       />
       <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        {(comparison || compareError) && <Card className="p-4"><p className={compareError ? "text-sm text-red-700" : "text-sm text-foreground"}>{compareError || `WER ${(comparison?.wer ?? 0) * 100}% · CER ${(comparison?.cer ?? 0) * 100}% · ${comparison?.mismatches.length ?? 0} mismatches`}</p></Card>}
         <div className="grid grid-cols-4 gap-4">
           {[
             { label: "Word Error Rate",     val: "4.2%",  color: "text-amber-700" },
@@ -1606,8 +1773,15 @@ function CompareScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
 
 // ─── Clinical Review ──────────────────────────────────────────
 
-function ClinicalReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
+function ClinicalReviewScreen({ documentIds = [], onNavigate }: { documentIds?: string[]; onNavigate: (s: Screen) => void }) {
   const [resolved, setResolved] = useState<Set<number>>(new Set());
+  const [backendResult, setBackendResult] = useState<{ risk_level: string; risk_score: number; summary: string } | null>(null);
+  const [reviewError, setReviewError] = useState("");
+  const executeReview = async () => {
+    if (!documentIds.length) { setReviewError("Open a document before running clinical review."); return; }
+    try { setReviewError(""); setBackendResult(await runClinicalReview(documentIds)); }
+    catch (error) { setReviewError(error instanceof Error ? error.message : "Clinical review failed"); }
+  };
 
   const issues = [
     {
@@ -1655,7 +1829,7 @@ function ClinicalReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void 
         ]}
         actions={
           <>
-            <Btn variant="outline" size="sm" icon={<Download className="w-3.5 h-3.5" />}>Export Report</Btn>
+            <Btn variant="outline" size="sm" icon={<Download className="w-3.5 h-3.5" />} onClick={executeReview}>Run Clinical Check</Btn>
             <Btn variant="primary" size="sm" icon={<Check className="w-3.5 h-3.5" />} disabled={unresolvedCritical > 0}>
               {unresolvedCritical > 0 ? `${unresolvedCritical} critical unresolved` : "Accept with Caveats"}
             </Btn>
@@ -1663,6 +1837,7 @@ function ClinicalReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void 
         }
       />
       <div className="flex-1 overflow-y-auto p-6 space-y-5">
+        {(backendResult || reviewError) && <Card className="p-4"><p className={reviewError ? "text-sm text-red-700" : "text-sm text-foreground"}>{reviewError || `${backendResult?.risk_level} risk (${backendResult?.risk_score}): ${backendResult?.summary}`}</p></Card>}
         <div className={cn("flex items-center gap-4 p-4 rounded-lg border-2", cfg.bg, cfg.border)}>
           <cfg.Icon className={cn("w-6 h-6 flex-shrink-0", cfg.text)} />
           <div className="flex-1">
@@ -1757,6 +1932,7 @@ function ClinicalReviewScreen({ onNavigate }: { onNavigate: (s: Screen) => void 
 // ─── Batch ────────────────────────────────────────────────────
 
 function BatchScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
+  return <div className="p-6"><Card className="p-8 text-center"><h2 className="text-base font-semibold">Batch processing is not yet implemented</h2><p className="text-sm text-muted-foreground mt-2">This screen is intentionally disabled until a backend batch job endpoint is available.</p></Card></div>;
   const batch = [
     { id: "B-001", customer: "Marcus Williams", file: "recording_2024-01-15.wav",   type: "ASR", status: "processing", progress: 45 },
     { id: "B-002", customer: "Elena Rodriguez", file: "prescription_scan.pdf",      type: "OCR", status: "processing", progress: 78 },
@@ -1851,7 +2027,7 @@ function BatchScreen({ onNavigate }: { onNavigate: (s: Screen) => void }) {
 // ─── Tasks ────────────────────────────────────────────────────
 
 function TasksScreen({
-  taskRows = allTasks,
+  taskRows = [],
   onCompleteTask,
 }: {
   taskRows?: TaskRow[];
@@ -1927,10 +2103,10 @@ function TasksScreen({
 function HistoryScreen() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [entries, setEntries] = useState<Awaited<ReturnType<typeof listHistory>>>([]);
+  useEffect(() => { listHistory().then(setEntries).catch(() => setEntries([])); }, []);
 
-  const filtered = historyItems.filter(h =>
-    (h.customer.toLowerCase().includes(search.toLowerCase()) || h.action.toLowerCase().includes(search.toLowerCase()))
-  );
+  const filtered = entries.map(entry => ({ id: entry.id, time: new Date(entry.created_at).toLocaleTimeString(), date: new Date(entry.created_at).toLocaleDateString(), customer: entry.customer_id ?? "Tenant", action: entry.action, model: entry.actor, confidence: null, status: "complete" })).filter(h => h.customer.toLowerCase().includes(search.toLowerCase()) || h.action.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -1993,7 +2169,7 @@ function HistoryScreen() {
             </table>
           </div>
           <div className="px-5 py-3 border-t border-border text-xs text-muted-foreground">
-            Showing {filtered.length} of {historyItems.length} entries
+            Showing {filtered.length} of {entries.length} entries
           </div>
         </Card>
       </div>
@@ -2006,12 +2182,17 @@ function HistoryScreen() {
 function DocumentsScreen({
   documentRows,
   onNavigate,
+  onOpenDocument,
 }: {
   documentRows?: DocumentRow[];
   onNavigate: (s: Screen) => void;
+  onOpenDocument?: (document: DocumentRow) => void;
 }) {
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [search, setSearch] = useState("");
+  if (!documentRows) {
+    return <div className="p-6 text-sm text-muted-foreground">Loading documents from the backend...</div>;
+  }
 
   const docs = (documentRows ?? [
     { id: "D-1001", name: "Visit Note — Jan 15, 2024",  customer: "Sarah Chen",      type: "ASR",    confidence: 94.2, status: "review-required", date: "Jan 15, 2024" },
@@ -2077,7 +2258,7 @@ function DocumentsScreen({
                     <td className="px-5 py-3.5 text-xs text-muted-foreground whitespace-nowrap">{doc.date}</td>
                     <td className="px-5 py-3.5">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Btn variant="ghost" size="sm" onClick={() => onNavigate(doc.type === "ASR" ? "asr-review" : "ocr-review")}>Open</Btn>
+                        <Btn variant="ghost" size="sm" onClick={() => onOpenDocument?.(doc) ?? onNavigate(doc.type === "ASR" ? "asr-review" : "ocr-review")}>Open</Btn>
                       </div>
                     </td>
                   </tr>
@@ -2089,7 +2270,7 @@ function DocumentsScreen({
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {docs.map(doc => (
               <Card key={doc.id} className="p-4 cursor-pointer hover:border-primary/40 hover:shadow-sm transition-all"
-                onClick={() => onNavigate(doc.type === "ASR" ? "asr-review" : "ocr-review")}>
+                onClick={() => onOpenDocument?.(doc) ?? onNavigate(doc.type === "ASR" ? "asr-review" : "ocr-review")}>
                 <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center mb-3",
                   doc.type === "ASR" ? "bg-blue-50 text-blue-600" : "bg-teal-50 text-teal-600"
                 )}>
@@ -2113,6 +2294,7 @@ function DocumentsScreen({
 // ─── Settings ─────────────────────────────────────────────────
 
 function SettingsScreen() {
+  return <div className="p-6"><Card className="p-8 text-center"><h2 className="text-base font-semibold">Settings management is not yet implemented</h2><p className="text-sm text-muted-foreground mt-2">Runtime settings are available from the authenticated backend health/configuration endpoints; editing controls are intentionally disabled.</p></Card></div>;
   const [tab, setTab] = useState("general");
 
   return (
@@ -2279,6 +2461,7 @@ export default function App() {
   const [customerRows, setCustomerRows] = useState<CustomerRow[] | undefined>();
   const [documentRows, setDocumentRows] = useState<DocumentRow[] | undefined>();
   const [taskRows, setTaskRows] = useState<TaskRow[] | undefined>();
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string>();
 
   const refreshApiData = async () => {
     const [apiCustomers, apiDocuments, apiTasks] = await Promise.all([
@@ -2300,7 +2483,7 @@ export default function App() {
 
   useEffect(() => {
     refreshApiData().catch(error => {
-      console.warn("Backend API unavailable; using sample data.", error);
+      console.warn("Backend API unavailable; live customer and document controls are unavailable.", error);
     });
   }, []);
 
@@ -2331,17 +2514,22 @@ export default function App() {
     setScreen("documents");
   };
 
+  const openDocument = (document: DocumentRow) => {
+    setSelectedDocumentId(document.id);
+    setScreen(document.type === "ASR" ? "asr-review" : "ocr-review");
+  };
+
   const screenEl = ((): React.ReactNode => {
     switch (screen) {
       case "dashboard":          return <DashboardScreen          onNavigate={setScreen} />;
       case "customers":          return <CustomersScreen           customerRows={customerRows} onCreateCustomer={handleCreateCustomer} onNavigate={setScreen} />;
       case "customer-workspace": return <CustomerWorkspaceScreen   onNavigate={setScreen} />;
       case "new-processing":     return <NewProcessingScreen       customerRows={customerRows} onSaveManualNote={handleSaveManualNote} onProcessed={handleProcessedDocument} />;
-      case "documents":          return <DocumentsScreen           documentRows={documentRows} onNavigate={setScreen} />;
-      case "asr-review":         return <ASRReviewScreen           onNavigate={setScreen} />;
-      case "ocr-review":         return <OCRReviewScreen           onNavigate={setScreen} />;
-      case "compare":            return <CompareScreen             onNavigate={setScreen} />;
-      case "clinical-review":    return <ClinicalReviewScreen      onNavigate={setScreen} />;
+      case "documents":          return <DocumentsScreen           documentRows={documentRows} onNavigate={setScreen} onOpenDocument={openDocument} />;
+      case "asr-review":         return <ASRReviewScreen           documentId={selectedDocumentId} onNavigate={setScreen} />;
+      case "ocr-review":         return <OCRReviewScreen           documentId={selectedDocumentId} onNavigate={setScreen} />;
+      case "compare":            return <CompareScreen             documentIds={documentRows?.slice(0, 2).map(item => item.id)} onNavigate={setScreen} />;
+      case "clinical-review":    return <ClinicalReviewScreen      documentIds={selectedDocumentId ? [selectedDocumentId] : []} onNavigate={setScreen} />;
       case "batch":              return <BatchScreen               onNavigate={setScreen} />;
       case "tasks":              return <TasksScreen               taskRows={taskRows} onCompleteTask={handleCompleteTask} />;
       case "history":            return <HistoryScreen />;

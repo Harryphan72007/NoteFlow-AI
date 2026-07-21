@@ -17,4 +17,8 @@ def clean_database():
 
 @pytest.fixture
 def client():
-    return TestClient(app)
+    client = TestClient(app)
+    login = client.post("/api/auth/login", json={"username": "local.user", "password": "noteflow-local"})
+    assert login.status_code == 200, login.text
+    client.headers.update({"Authorization": f"Bearer {login.json()['access_token']}"})
+    return client

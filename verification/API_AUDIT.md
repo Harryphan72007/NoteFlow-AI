@@ -13,6 +13,6 @@ Additional real-service checks:
 - `POST /api/ai/key-points`: HTTP 200 from `qwen3:4b`.
 - Customer-linked E2E workflow: passed.
 
-Endpoints still absent: dashboard aggregation, batch jobs, evaluation dashboard, settings/model management, history export, and a trusted auth/session layer.
+Verified in this pass: `/api/auth/login`, `/api/auth/register`, `/api/dashboard`, `/api/history`, `/api/history/export`, `/api/settings`, and authenticated ownership enforcement. Batch processing remains intentionally unimplemented and is explicitly labeled in the UI.
 
 Evidence: `verification/evidence/api/summary.json` and `repair/logs/phase5_8_end_to_end.log`.

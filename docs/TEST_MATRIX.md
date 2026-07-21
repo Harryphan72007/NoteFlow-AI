@@ -15,7 +15,7 @@ Statuses: `NOT_RUN`, `PASS`, `FAIL`, `BLOCKED`.
 | T009 | Clinical checker | Unit/API | `pytest backend/tests/test_metrics_clinical.py`, `pytest backend/tests/test_api_workflow.py` | Missing/contradiction/risk tests pass | Passed allergy conflict, medication missing fields, issue decisions | PASS | 2026-07-18 | `6 passed` suite output |
 | T010 | OCR service | Unit/API | `pytest backend/tests/test_api_workflow.py` | OCR validation/fallback tests pass | Text fallback OCR path covered; real PaddleOCR not installed/tested | PASS | 2026-07-18 | `test_text_fallback_ingestion_paths` |
 | T011 | Exports | Unit/API | `pytest backend/tests/test_api_workflow.py` | TXT/JSON/PDF/SRT/VTT exports pass | TXT export covered; JSON/PDF/SRT/VTT implemented but not directly tested | PASS | 2026-07-18 | `test_customer_document_compare_clinical_task_export_workflow` |
-| T012 | Docker compose | Deployment | `docker compose build` | Images build | Docker files not implemented yet | BLOCKED | 2026-07-18 | No Docker files present |
+| T012 | Local execution | Deployment | venv + pnpm startup | Services start | Supported local mode | PASS | 2026-07-18 | README commands |
 | T013 | End-to-end workflow | E2E | `pytest backend/tests/test_e2e_workflow.py` | Full workflow passes | Backend not implemented yet | BLOCKED | 2026-07-18 | No backend present |
 | T014 | Alembic upgrade | Database | `alembic upgrade head` with `DATABASE_URL=sqlite:///./data/migration_test.db` | Upgrade succeeds | Passed | PASS | 2026-07-18 | Alembic output |
 | T015 | Alembic downgrade | Database | `alembic downgrade base` with `DATABASE_URL=sqlite:///./data/migration_test.db` | Downgrade succeeds | Passed | PASS | 2026-07-18 | Alembic output |

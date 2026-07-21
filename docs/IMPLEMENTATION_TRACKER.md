@@ -5,7 +5,7 @@ Statuses: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `IMPLEMENTED`, `TESTED`, `VER
 Baseline as of 2026-07-18:
 - Workspace contains an approved React/Vite frontend under `Frontend/`.
 - No `.git` repository metadata is present in `D:\NoteFlow AI`.
-- No backend, database, migrations, tests, Docker files, or API client were present at initial inspection.
+- The current project uses local backend/database/migrations/tests and an API client; container deployment was removed from scope on 2026-07-18.
 - Frontend UI preservation is mandatory; visual changes are not intentional unless explicitly recorded.
 
 | ID | Area | Requirement | Frontend location | Backend endpoint/service | Database dependency | Implementation status | Test status | Evidence | Notes |
@@ -57,7 +57,6 @@ Baseline as of 2026-07-18:
 | R045 | File cleanup | Clean temporary uploads safely | Backend only | storage service | N/A | NOT_STARTED | NOT_RUN | No backend present | Test cleanup |
 | R046 | Security validation | Validate paths, MIME, sizes, PDFs, prompt injection | Upload/review flows | validators/services | N/A | NOT_STARTED | NOT_RUN | No backend present | |
 | R047 | Local deployment | Reproducible Windows local dev | README/docs | Uvicorn/Vite | SQLite | TESTED | PASS | Backend health and frontend build passed | Dev server not left running |
-| R048 | Docker deployment | Dockerfiles/compose/health/persistence | N/A | backend/frontend containers | volumes | IMPLEMENTED | NOT_RUN | Docker files added | Not built/tested |
 | R049 | Persistent storage | Restart does not remove data/files | All persisted UI | DB/storage services | SQLite/files | NOT_STARTED | NOT_RUN | No backend present | |
 | R050 | Documentation | README/API/deployment/known limitations | Docs | N/A | N/A | IN_PROGRESS | NOT_RUN | Control docs created | Must be updated continuously |
 | R051 | End-to-end verification | Full workflow passes with evidence | Full UI/API | All services | All core tables | NOT_STARTED | NOT_RUN | No backend present | Real ASR/OCR may require model availability |
@@ -67,6 +66,6 @@ Baseline as of 2026-07-18:
 - Last completed requirement: Initial attachment review and repository discovery.
 - Currently active task: Baseline/control documentation and frontend/API mapping.
 - Current failure, if any: Frontend UI still uses embedded sample data; API integration wiring is not complete.
-- Next exact command: Add nonvisual frontend API client/state adapters or run `docker compose build` if deployment verification is the next priority.
+- Next exact command: Add nonvisual frontend API client/state adapters and run the local verification scripts.
 - Files currently being edited: backend scaffold, docs, deployment files.
-- Tests that must be rerun: `pytest backend\tests -q`, `pnpm run build`, Docker build when Docker is available.
+- Tests that must be rerun: `pytest backend\tests -q`, `pnpm run build`, and the local API/persistence/workflow verifiers.

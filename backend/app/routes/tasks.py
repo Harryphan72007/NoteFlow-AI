@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from .. import models
 from ..database import get_db
 from ..schemas import TaskCreate, TaskResponse, TaskUpdate
 from ..services.ownership import require_customer_access
+from ..services.auth import scoped_customer
 
 
 router = APIRouter(tags=["tasks"])
@@ -22,7 +23,8 @@ def task_or_404(db: Session, task_id: str) -> models.Task:
 
 
 @router.get("/tasks", response_model=list[TaskResponse])
-def list_tasks(customer_id: str | None = None, status: str | None = None, db: Session = Depends(get_db)):
+def list_tasks(customer_id: str | None = None, status: str | None = None, db: Session = Depends(get_db), request: Request = None):
+    customer_id = scoped_customer(request, customer_id)
     query = db.query(models.Task)
     if customer_id:
         query = query.filter(models.Task.customer_id == customer_id)
@@ -32,7 +34,8 @@ def list_tasks(customer_id: str | None = None, status: str | None = None, db: Se
 
 
 @router.post("/tasks", response_model=TaskResponse)
-def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
+def create_task(payload: TaskCreate, db: Session = Depends(get_db), request: Request = None):
+    payload.customer_id = scoped_customer(request, payload.customer_id)
     task = models.Task(**payload.model_dump())
     db.add(task)
     db.add(models.AuditLog(customer_id=payload.customer_id, document_id=payload.document_id, action="task_created", new_value_json=payload.model_dump_json()))
@@ -42,7 +45,8 @@ def create_task(payload: TaskCreate, db: Session = Depends(get_db)):
 
 
 @router.patch("/tasks/{task_id}", response_model=TaskResponse)
-def update_task(task_id: str, payload: TaskUpdate, customer_id: str | None = None, db: Session = Depends(get_db)):
+def update_task(task_id: str, payload: TaskUpdate, customer_id: str | None = None, db: Session = Depends(get_db), request: Request = None):
+    customer_id = scoped_customer(request, customer_id)
     task = task_or_404(db, task_id)
     require_customer_access(task.customer_id, customer_id)
     for key, value in payload.model_dump(exclude_unset=True).items():
@@ -54,7 +58,8 @@ def update_task(task_id: str, payload: TaskUpdate, customer_id: str | None = Non
 
 
 @router.delete("/tasks/{task_id}")
-def delete_task(task_id: str, customer_id: str | None = None, db: Session = Depends(get_db)):
+def delete_task(task_id: str, customer_id: str | None = None, db: Session = Depends(get_db), request: Request = None):
+    customer_id = scoped_customer(request, customer_id)
     task = task_or_404(db, task_id)
     require_customer_access(task.customer_id, customer_id)
     db.delete(task)
@@ -63,11 +68,12 @@ def delete_task(task_id: str, customer_id: str | None = None, db: Session = Depe
 
 
 @router.post("/tasks/{task_id}/complete", response_model=TaskResponse)
-def complete_task(task_id: str, customer_id: str | None = None, db: Session = Depends(get_db)):
+def complete_task(task_id: str, customer_id: str | None = None, db: Session = Depends(get_db), request: Request = None):
+    customer_id = scoped_customer(request, customer_id)
     task = task_or_404(db, task_id)
     require_customer_access(task.customer_id, customer_id)
     task.status = "complete"
-    task.completed_at = datetime.utcnow()
+    task.completed_at = datetime.now(timezone.utc)
     db.add(models.AuditLog(customer_id=task.customer_id, document_id=task.document_id, action="task_completed"))
     db.commit()
     db.refresh(task)

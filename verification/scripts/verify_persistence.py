@@ -30,6 +30,9 @@ def main() -> int:
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     client = TestClient(app)
+    login = client.post("/api/auth/login", json={"username": "local.user", "password": "noteflow-local"})
+    login.raise_for_status()
+    client.headers.update({"Authorization": f"Bearer {login.json()['access_token']}"})
 
     customer = client.post("/api/customers", json={"customer_code": "PT-PERSIST", "full_name": "Persist Patient"}).json()
     document = client.post("/api/documents/manual", json={"customer_id": customer["id"], "source_name": "Persist note", "text": "Persisted text."}).json()

@@ -2,22 +2,17 @@
 
 Updated: 2026-07-18
 
-Status: **CORE REPAIRS VERIFIED; AUTH GAP REMAINS**
+## Verified
 
-## Passed
+- `/api/auth/login` issues an HMAC-signed bearer session token for a persisted local account.
+- User passwords are stored as PBKDF2 hashes; `/api/auth/register` creates additional persisted scoped users for local testing.
+- API routes require authentication. A scoped token cannot access another customer's documents or customer route by forging `customer_id` in a body/query.
+- Magic-byte validation, path containment, invalid email rejection, cross-customer checks, prompt-injection handling, and failed-upload cleanup remain covered.
 
-- Wrong-customer document/task/issue operations are rejected when customer context is supplied.
-- Invalid email returns 422.
-- Cross-customer combine returns 409.
-- Fake `.wav` text and fake `.png` PDF content return 415.
-- Empty and unsupported uploads are rejected.
-- Prompt injection could not alter the Ollama JSON schema or add fabricated diagnosis data.
-- Uploaded paths are constrained to configured storage directories.
+## Scope limitations
 
-## Remaining Risk
+This is a local single-tenant prototype. Broader RBAC, rate limiting, TLS termination, malware scanning, and encryption-at-rest are deferred until a multi-user/production deployment is planned. The production path would add an external identity provider or managed session store, reverse-proxy TLS, malware scanning/quarantine, encrypted storage/keys, and request throttling.
 
-- There is no authenticated principal or role model. `customer_id` is optional caller input, so it is not a trusted security boundary by itself.
-- Development `.txt` ASR/OCR fallback should be disabled in production.
-- Full CORS, oversized-upload, malware scanning, and rate-limit testing were not performed.
+Development text fallback is disabled by default and only enabled explicitly in test/verifier environments.
 
-Tests: 12 backend tests and 35 API checks passed.
+Evidence: `repair/logs/phase2_auth.log`, `backend/tests/test_remaining_repairs.py`, and `repair/logs/phase9_production_gaps.log`.

@@ -8,17 +8,42 @@ export type ApiCustomer = {
   duplicate_warning?: boolean;
 };
 
+export type ApiOCRBlock = {
+  id: string;
+  text: string;
+  corrected_text?: string | null;
+  confidence?: number | null;
+  bounding_box: [number, number, number, number];
+  reading_order: number;
+  region_type: string;
+};
+
+export type ApiOCRPage = {
+  id: string;
+  page_number: number;
+  width: number;
+  height: number;
+  average_confidence?: number | null;
+  blocks: ApiOCRBlock[];
+};
+
 export type ApiDocument = {
   document_id: string;
   customer_id?: string | null;
   source_type: string;
   source_name: string;
+  original_filename?: string | null;
   text: string;
+  corrected_text?: string | null;
   language: string;
   status: string;
   processing_status: string;
   average_confidence?: number | null;
+  metadata?: Record<string, unknown>;
   created_at: string;
+  updated_at?: string;
+  segments?: Array<{ id: string; start: number; end: number; text: string; confidence?: number | null }>;
+  pages?: ApiOCRPage[];
 };
 
 export type ApiTask = {
@@ -45,12 +70,28 @@ function buildUrl(path: string, query?: RequestOptions["query"]) {
   return url.toString();
 }
 
+async function ensureToken() {
+  const existing = window.localStorage.getItem("noteflow_session");
+  if (existing) return existing;
+  const response = await fetch(buildUrl("/auth/login"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username: "local.user", password: "noteflow-local" }),
+  });
+  if (!response.ok) throw new Error("Unable to establish a local session");
+  const body = await response.json() as { access_token: string };
+  window.localStorage.setItem("noteflow_session", body.access_token);
+  return body.access_token;
+}
+
 async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { query, headers, body, ...init } = options;
+  const token = path.startsWith("/auth/") ? undefined : await ensureToken();
   const response = await fetch(buildUrl(path, query), {
     ...init,
     headers: {
       ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...headers,
     },
     body,
@@ -91,11 +132,53 @@ export function createManualDocument(payload: {
   });
 }
 
+const ASR_LANGUAGE_NAMES: Record<string, string> = {
+  en: "English",
+  "en-au": "English",
+  "en-us": "English",
+  zh: "Chinese",
+  "zh-cn": "Chinese",
+  "zh-tw": "Chinese",
+  yue: "Cantonese",
+  ar: "Arabic",
+  de: "German",
+  fr: "French",
+  es: "Spanish",
+  pt: "Portuguese",
+  id: "Indonesian",
+  it: "Italian",
+  ko: "Korean",
+  ru: "Russian",
+  th: "Thai",
+  vi: "Vietnamese",
+  ja: "Japanese",
+  tr: "Turkish",
+  hi: "Hindi",
+  ms: "Malay",
+  nl: "Dutch",
+  sv: "Swedish",
+  da: "Danish",
+  fi: "Finnish",
+  pl: "Polish",
+  cs: "Czech",
+  fil: "Filipino",
+  fa: "Persian",
+  el: "Greek",
+  ro: "Romanian",
+  hu: "Hungarian",
+  mk: "Macedonian",
+};
+
+export function normalizeAsrLanguage(language: string) {
+  const normalized = language.trim().toLowerCase();
+  return ASR_LANGUAGE_NAMES[normalized] ?? language;
+}
+
 export function transcribeFile(file: File, customerId?: string, language = "en") {
   const body = new FormData();
   body.append("file", file);
   if (customerId) body.append("customer_id", customerId);
-  body.append("language", language);
+  body.append("language", normalizeAsrLanguage(language));
   body.append("save_document", "true");
   return apiFetch<ApiDocument>("/transcribe", { method: "POST", body });
 }
@@ -119,4 +202,50 @@ export function completeTask(taskId: string, customerId?: string | null) {
     method: "POST",
     query: { customer_id: customerId },
   });
+}
+
+export function getDashboard() {
+  return apiFetch<{ date: string; documents_today: number; pending_reviews: number; processing_queue: number; total_processed: number; activity: Array<{ day: string; asr: number; ocr: number }>; queue: Array<{ id: string; name: string; status: string; type: string }>; services: Record<string, unknown> }>("/dashboard");
+}
+
+export function listHistory() {
+  return apiFetch<Array<{ id: string; action: string; actor: string; created_at: string; customer_id?: string | null; document_id?: string | null }>>("/history");
+}
+
+export function getDocument(documentId: string) {
+  return apiFetch<ApiDocument>(`/documents/${documentId}`);
+}
+
+export async function getDocumentPageImage(documentId: string, pageNumber: number, processed = true) {
+  const token = await ensureToken();
+  const url = buildUrl(`/documents/${documentId}/pages/${pageNumber}/image`, { processed: processed ? "true" : "false" });
+  const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+  if (!response.ok) {
+    throw new Error((await response.text()) || `Unable to load page image (${response.status})`);
+  }
+  return URL.createObjectURL(await response.blob());
+}
+
+export function updateDocumentText(documentId: string, corrected_text: string) {
+  return apiFetch<ApiDocument>(`/documents/${documentId}/text`, { method: "PATCH", body: JSON.stringify({ corrected_text }) });
+}
+
+export function finalizeDocument(documentId: string) {
+  return apiFetch<ApiDocument>(`/documents/${documentId}/finalize`, { method: "POST" });
+}
+
+export function compareDocuments(documentIds: string[]) {
+  return apiFetch<{ wer: number; cer: number; mismatches: unknown[]; replacements: unknown[] }>("/compare", { method: "POST", body: JSON.stringify({ document_ids: documentIds }) });
+}
+
+export function runClinicalReview(documentIds: string[], noteType = "progress_note") {
+  return apiFetch<{ analysis_id: string; risk_level: string; risk_score: number; issues: unknown[]; tasks: unknown[]; summary: string }>("/clinical-review", { method: "POST", body: JSON.stringify({ document_ids: documentIds, note_type: noteType }) });
+}
+
+export function runAiAction(action: "summarize" | "translate" | "key-points" | "tasks" | "format-note", text: string, target_language?: string) {
+  return apiFetch<Record<string, unknown>>(`/ai/${action}`, { method: "POST", body: JSON.stringify({ text, target_language }) });
+}
+
+export function health() {
+  return apiFetch<{ status: string; services: Record<string, unknown> }>("/../health");
 }

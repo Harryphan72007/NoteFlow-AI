@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
 
 from .. import models
@@ -13,6 +13,7 @@ from ..serializers import document_to_response
 from ..services.asr import ASRServiceError, transcribe_audio
 from ..services.ocr import OCRServiceError, recognize_document
 from ..services.storage import save_upload
+from ..services.auth import scoped_customer
 
 
 router = APIRouter(tags=["processing"])
@@ -33,7 +34,9 @@ async def transcribe(
     language: str = Form(default="en"),
     save_document: bool = Form(default=True),
     db: Session = Depends(get_db),
+    request: Request = None,
 ):
+    customer_id = scoped_customer(request, customer_id)
     _validate_customer(db, customer_id)
     path, body = await save_upload(file, allowed=AUDIO_EXT, max_mb=settings.asr_max_file_mb, subdir="audio")
     suffix = Path(file.filename or "").suffix.lower()
@@ -42,6 +45,7 @@ async def transcribe(
         "device": settings.mega_asr_device,
         "dtype": settings.asr_dtype,
         "stored_file_path": str(path),
+        "timestamp_source": "estimated",
     }
     confidence = None
     if suffix == ".txt" and settings.asr_allow_text_fallback:
@@ -50,8 +54,9 @@ async def transcribe(
         metadata["warning"] = "Text fallback used for ASR endpoint; no real audio model inference was run."
     else:
         try:
-            result = transcribe_audio(path)
+            result = transcribe_audio(path, language=language)
         except ASRServiceError as exc:
+            path.unlink(missing_ok=True)
             raise HTTPException(status_code=503, detail={"code": exc.code, "message": str(exc)}) from exc
         text = result["text"]
         metadata.update(
@@ -66,8 +71,12 @@ async def transcribe(
             }
         )
 
+    if not save_document:
+        path.unlink(missing_ok=True)
+        return {"saved": False, "text": text, "metadata": metadata, "segments": [{"start": 0.0, "end": max(1.0, len(text.split()) / 2.5), "text": text, "confidence": confidence}]}
+
     document = models.Document(
-        customer_id=customer_id if save_document else None,
+        customer_id=customer_id,
         source_type="audio",
         source_name=file.filename or "audio_upload",
         original_filename=file.filename,
@@ -95,7 +104,9 @@ async def ocr(
     preprocess: bool = Form(default=True),
     save_document: bool = Form(default=True),
     db: Session = Depends(get_db),
+    request: Request = None,
 ):
+    customer_id = scoped_customer(request, customer_id)
     _validate_customer(db, customer_id)
     path, body = await save_upload(file, allowed=OCR_EXT, max_mb=settings.ocr_max_file_mb, subdir="ocr")
     suffix = Path(file.filename or "").suffix.lower()
@@ -113,8 +124,9 @@ async def ocr(
         metadata["warning"] = "Text fallback used for OCR endpoint; no real OCR model inference was run."
     else:
         try:
-            result = recognize_document(path, suffix, language)
+            result = recognize_document(path, suffix, language, preprocess=preprocess)
         except OCRServiceError as exc:
+            path.unlink(missing_ok=True)
             raise HTTPException(status_code=422, detail={"code": "ocr_error", "message": str(exc)}) from exc
         text = result["text"]
         confidence = result["average_confidence"]
@@ -124,8 +136,12 @@ async def ocr(
             {warning for page_result in page_results for warning in page_result["quality_warnings"]}
         )
 
+    if not save_document:
+        path.unlink(missing_ok=True)
+        return {"saved": False, "text": text, "metadata": metadata, "pages": page_results or []}
+
     document = models.Document(
-        customer_id=customer_id if save_document else None,
+        customer_id=customer_id,
         source_type="pdf" if suffix == ".pdf" else "image",
         source_name=file.filename or "document_upload",
         original_filename=file.filename,

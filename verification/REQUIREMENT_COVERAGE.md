@@ -13,11 +13,11 @@ Updated: 2026-07-18
 | MIME/content validation | VERIFIED | mismatched content rejected |
 | Browser recording conversion | VERIFIED | WebM/Opus to mono 16 kHz WAV |
 | Full clinical workflow | VERIFIED | ASR -> OCR -> Ollama -> risk -> visible note |
-| Dashboard live metrics | PARTIAL | demonstration values remain |
-| Review/Compare actions | PARTIAL | backend exists; frontend actions remain local in places |
-| Batch processing | MISSING | no batch endpoint |
-| History/settings management | MISSING | no complete backend routes |
-| Authentication/authorization | MISSING | caller-supplied customer context only |
+| Dashboard live metrics | VERIFIED | `/api/dashboard` and browser smoke |
+| Review/Compare actions | PARTIAL | selected review/compare/clinical actions call backend; some correction/export UI remains open |
+| Batch processing | EXPLICITLY DEFERRED | UI states not yet implemented; no fake results |
+| History/settings management | PARTIAL | history retrieval/export wired; settings editing deferred |
+| Authentication/authorization | VERIFIED | signed session token and scoped ownership regression |
 | Multi-page PDF corpus | UNVERIFIED | real image OCR tested |
 | PostgreSQL production runtime | UNVERIFIED | SQLite verified |
-| Docker | NOT_REQUIRED | normal local execution selected |
+| Local execution | VERIFIED | venv + pnpm commands |

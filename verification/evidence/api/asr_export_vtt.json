@@ -3,5 +3,5 @@
   "status_code": 200,
   "expected_status": 200,
   "pass": true,
-  "body": "WEBVTT\r\n\r\n00:00:00.000 --> 00:00:02.000\r\nTake 5 mg once daily.\r\n"
+  "body": "WEBVTT\r\n\r\nNOTE timestamps are estimated from transcript length; model timestamps were not available.\r\n\r\n00:00:00.000 --> 00:00:02.000\r\nTake 5 mg once daily.\r\n"
 }

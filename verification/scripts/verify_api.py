@@ -16,6 +16,8 @@ os.environ["UPLOAD_DIR"] = str((EVIDENCE / "uploads").resolve())
 os.environ["PROCESSED_DIR"] = str((EVIDENCE / "processed").resolve())
 os.environ["EXPORT_DIR"] = str((EVIDENCE / "exports").resolve())
 os.environ["APP_AUTO_CREATE_DB"] = "true"
+os.environ["ASR_ALLOW_TEXT_FALLBACK"] = "true"
+os.environ["OCR_ALLOW_TEXT_FALLBACK"] = "true"
 
 sys.path.insert(0, str(ROOT))
 
@@ -57,6 +59,9 @@ def main() -> int:
     Base.metadata.create_all(bind=engine)
 
     client = TestClient(app)
+    login = client.post("/api/auth/login", json={"username": "local.user", "password": "noteflow-local"})
+    login.raise_for_status()
+    client.headers.update({"Authorization": f"Bearer {login.json()['access_token']}"})
     results = []
 
     health = client.get("/health")

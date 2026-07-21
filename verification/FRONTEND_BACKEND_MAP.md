@@ -12,12 +12,12 @@ Updated: 2026-07-18
 | Image/PDF browse/drop | `POST /api/ocr` | WIRED |
 | Camera file selection | `capture=environment` -> `/api/ocr` | WIRED |
 | Task list/complete | `GET /api/tasks`, complete endpoint | WIRED |
-| Dashboard metrics/health detail | No aggregation endpoint | SAMPLE DATA |
-| ASR/OCR review corrections/finalize/export | Backend routes exist | UI PARTIAL/LOCAL |
-| Compare and clinical issue decisions | Backend routes exist | UI PARTIAL/LOCAL |
-| Batch | No batch endpoint | MISSING |
-| History export | No endpoint | MISSING |
-| Settings/model management | No endpoint | MISSING |
+| Dashboard metrics/health detail | `GET /api/dashboard` | WIRED |
+| ASR/OCR review corrections/finalize/export | Backend routes; selected record loading/finalize wired | PARTIAL |
+| Compare and clinical issue decisions | `POST /api/compare`, `/api/clinical-review` | WIRED |
+| Batch | No endpoint | EXPLICITLY NOT IMPLEMENTED |
+| History export | `GET /api/history`, `/api/history/export` | WIRED |
+| Settings/model management | `GET /api/settings`; editing deferred | EXPLICITLY NOT IMPLEMENTED |
 
 Browser evidence:
 

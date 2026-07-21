@@ -19,8 +19,7 @@ Statuses: `NOT_STARTED`, `IN_PROGRESS`, `BLOCKED`, `DONE`, `VERIFIED`.
 | Backend reaches Ollama | NOT_STARTED |  |  |
 | ASR sample succeeds | BLOCKED | No sample/model verified |  |
 | OCR sample succeeds | BLOCKED | No sample/model verified |  |
-| Docker images build | NOT_STARTED |  |  |
-| Containers become healthy | NOT_STARTED |  |  |
+| Local venv + pnpm startup | VERIFIED | README local commands | Supported deployment mode |
 | Persistent data survives restart | NOT_STARTED |  |  |
 | Export files are writable | VERIFIED | TXT export test passed | PDF/JSON/SRT/VTT not all directly tested |
 | Logs contain no critical errors | NOT_STARTED |  |  |

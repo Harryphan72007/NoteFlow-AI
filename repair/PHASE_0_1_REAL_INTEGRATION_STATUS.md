@@ -50,8 +50,6 @@ Status: **REAL_TESTED**
 - The backend is real-tested, but existing frontend actions are not yet wired to `/api/ai/*`.
 - Evidence: `repair/logs/phase3_ollama.log`, `repair/logs/phase7_safety.log`.
 
-## Docker
+## Local execution
 
-Status: **NOT REQUIRED**
-
-The user explicitly chose normal local execution. Docker is removed from acceptance criteria and is not an error or blocker.
+Container support was removed on 2026-07-18. The supported mode is venv + pnpm.

@@ -21,6 +21,8 @@ def asr_status() -> dict:
         "dtype": settings.asr_dtype,
         "available": available,
         "reason": None if available else "The configured ASR environment, runner, or checkpoint is missing.",
+        "timestamp_source": "estimated",
+        "adaptation_note": "The CPU 0.6B checkpoint does not use Mega-ASR's released 1.7B LoRA/router adaptation.",
     }
 
 
@@ -33,4 +35,6 @@ def ocr_status() -> dict:
         "language": settings.ocr_language,
         "available": paddle_available,
         "fallback_enabled": settings.ocr_allow_text_fallback,
+        "supported_languages": ["en"],
+        "preprocessing": "grayscale + contrast normalization + denoise + sharpen",
     }

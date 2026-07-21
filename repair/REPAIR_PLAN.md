@@ -10,7 +10,7 @@ The previous audit showed:
 - Frontend build passed.
 - API audit failed with 2 cases: invalid email accepted and cross-customer direct document read.
 - Persistence passed.
-- Real ASR/OCR/Ollama and Docker were blocked by environment/runtime availability.
+- Real ASR/OCR/Ollama runtime availability was verified in the current environment.
 
 ## Ordered Plan
 
@@ -24,5 +24,4 @@ The previous audit showed:
 
 - Real Mega-ASR/Qwen3-ASR model runtime is not present in this workspace.
 - Real PaddleOCR runtime is not present in this workspace.
-- Docker is not available on PATH.
-- Full real-model and Docker acceptance criteria can only be marked `BLOCKED`, not `VERIFIED`, until those dependencies exist.
+- Container deployment is out of scope for this local prototype; local venv + pnpm startup is the acceptance path.

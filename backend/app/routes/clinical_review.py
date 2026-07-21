@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from .. import models
@@ -12,13 +12,15 @@ from ..schemas import ClinicalReviewRequest, IssueDecisionRequest
 from ..serializers import parse_json
 from ..services.clinical import run_clinical_review
 from ..services.ownership import require_customer_access
+from ..services.auth import scoped_customer
 
 
 router = APIRouter(tags=["clinical-review"])
 
 
 @router.post("/clinical-review")
-def clinical_review(payload: ClinicalReviewRequest, db: Session = Depends(get_db)):
+def clinical_review(payload: ClinicalReviewRequest, db: Session = Depends(get_db), request: Request = None):
+    payload.customer_id = scoped_customer(request, payload.customer_id)
     documents = [db.get(models.Document, document_id) for document_id in payload.document_ids]
     if any(document is None for document in documents):
         raise HTTPException(status_code=404, detail="Document not found")
@@ -91,7 +93,8 @@ def clinical_review(payload: ClinicalReviewRequest, db: Session = Depends(get_db
 
 
 @router.post("/issues/{issue_id}/decision")
-def issue_decision(issue_id: str, payload: IssueDecisionRequest, customer_id: str | None = None, db: Session = Depends(get_db)):
+def issue_decision(issue_id: str, payload: IssueDecisionRequest, customer_id: str | None = None, db: Session = Depends(get_db), request: Request = None):
+    customer_id = scoped_customer(request, customer_id)
     issue = db.get(models.AnalysisIssue, issue_id)
     if not issue:
         raise HTTPException(status_code=404, detail="Issue not found")
@@ -101,7 +104,7 @@ def issue_decision(issue_id: str, payload: IssueDecisionRequest, customer_id: st
     issue.status = payload.action
     issue.reviewer_reason = payload.reason
     if payload.action in {"accept", "ignore", "resolve"}:
-        issue.resolved_at = datetime.utcnow()
+        issue.resolved_at = datetime.now(timezone.utc)
     db.add(models.AuditLog(
         customer_id=issue.analysis.customer_id,
         document_id=issue.analysis.document_id,

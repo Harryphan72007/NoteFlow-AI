@@ -31,4 +31,4 @@ Status: **REAL CORE WORKFLOW VERIFIED; SECONDARY UI INCOMPLETE**
 - Full 1.7B Mega-ASR is optional; the CPU default is Qwen3-ASR-0.6B without the incompatible 1.7B LoRA/router.
 - Real multi-page PDF OCR and PostgreSQL runtime were not tested.
 
-Docker is not required. Evidence is in `repair/logs` and `verification/evidence`.
+Container deployment was removed on 2026-07-18. Evidence is in `repair/logs` and `verification/evidence`.

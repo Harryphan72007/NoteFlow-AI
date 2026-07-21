@@ -20,7 +20,9 @@
         "device": "cpu",
         "dtype": "float32",
         "available": true,
-        "reason": null
+        "reason": null,
+        "timestamp_source": "estimated",
+        "adaptation_note": "The CPU 0.6B checkpoint does not use Mega-ASR's released 1.7B LoRA/router adaptation."
       },
       "ocr": {
         "loaded": true,
@@ -28,13 +30,17 @@
         "device": "cpu",
         "language": "en",
         "available": true,
-        "fallback_enabled": true
+        "fallback_enabled": true,
+        "supported_languages": [
+          "en"
+        ],
+        "preprocessing": "grayscale + contrast normalization + denoise + sharpen"
       },
       "ollama": {
         "available": true,
         "model": "qwen3:4b",
         "model_available": true,
-        "loaded": true,
+        "loaded": false,
         "base_url": "http://localhost:11434",
         "keep_alive": "30m"
       }

@@ -64,7 +64,10 @@ def test_cross_customer_combine_rejected(client):
     assert response.status_code == 409
 
 
-def test_text_fallback_ingestion_paths(client):
+def test_text_fallback_ingestion_paths(client, monkeypatch):
+    from backend.app.config import settings
+    object.__setattr__(settings, "asr_allow_text_fallback", True)
+    object.__setattr__(settings, "ocr_allow_text_fallback", True)
     customer_id = client.post("/api/customers", json={"full_name": "Fallback Patient"}).json()["id"]
 
     asr = client.post(

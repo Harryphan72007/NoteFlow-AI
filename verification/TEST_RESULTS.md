@@ -17,10 +17,10 @@ Updated: 2026-07-18
 | OCR WER/CER | PASS: 0/0 |
 | Ollama structured/adversarial | PASS |
 | WebM audio conversion | PASS |
-| Docker | NOT_REQUIRED |
+| Local execution | PASS |
 
 Warnings still open:
 
-- 104 timezone-naive `datetime.utcnow()` deprecation warnings.
+- Zero timezone-naive datetime deprecation warnings after timezone-aware conversion.
 - Frontend main bundle is 669.90 kB and triggers Vite's chunk warning.
 - A persistent ASR worker would avoid reloading the 0.6B checkpoint for every request.

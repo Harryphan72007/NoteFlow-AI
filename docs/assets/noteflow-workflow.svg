@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+  <title id="title">NoteFlow AI workflow</title><desc id="desc">Audio, documents and text flow through local processing into review and export.</desc>
+  <rect width="1200" height="360" rx="24" fill="#f6f8fb"/>
+  <g font-family="Inter,Segoe UI,sans-serif">
+    <text x="56" y="52" font-size="24" font-weight="700" fill="#12233f">From raw input to reviewable documentation</text>
+    <text x="56" y="80" font-size="15" fill="#64748b">A local-first pipeline designed for traceability and human oversight.</text>
+    <g transform="translate(56 126)">
+      <rect width="210" height="150" rx="18" fill="#fff" stroke="#d7e0ea"/><circle cx="42" cy="42" r="22" fill="#e8f6f3"/><path d="M35 43h14M42 35v16M30 55c7 7 17 7 24 0" stroke="#118a82" stroke-width="3" fill="none" stroke-linecap="round"/><text x="24" y="94" font-size="18" font-weight="700" fill="#12233f">Inputs</text><text x="24" y="119" font-size="14" fill="#64748b">Audio · scans · text</text>
+    </g>
+    <path d="M282 201h70" stroke="#91a4b9" stroke-width="3" marker-end="url(#a)"/>
+    <g transform="translate(372 126)"><rect width="210" height="150" rx="18" fill="#12233f"/><circle cx="42" cy="42" r="22" fill="#29496f"/><path d="M32 43h20M42 33v20" stroke="#9fe4d5" stroke-width="3" stroke-linecap="round"/><text x="24" y="94" font-size="18" font-weight="700" fill="#fff">Local processing</text><text x="24" y="119" font-size="14" fill="#b8c6d8">ASR · OCR · models</text></g>
+    <path d="M598 201h70" stroke="#91a4b9" stroke-width="3" marker-end="url(#a)"/>
+    <g transform="translate(688 126)"><rect width="210" height="150" rx="18" fill="#fff" stroke="#d7e0ea"/><circle cx="42" cy="42" r="22" fill="#fff4d9"/><path d="M33 43l7 7 12-15" stroke="#c98a16" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="24" y="94" font-size="18" font-weight="700" fill="#12233f">Human review</text><text x="24" y="119" font-size="14" fill="#64748b">Compare · correct · approve</text></g>
+    <path d="M914 201h70" stroke="#91a4b9" stroke-width="3" marker-end="url(#a)"/>
+    <g transform="translate(1004 126)"><rect width="140" height="150" rx="18" fill="#e8f6f3" stroke="#bfe8df"/><circle cx="70" cy="42" r="22" fill="#fff"/><path d="M61 42h18M70 33v18" stroke="#118a82" stroke-width="3" stroke-linecap="round"/><text x="24" y="94" font-size="18" font-weight="700" fill="#12233f">Outputs</text><text x="24" y="119" font-size="14" fill="#39736e">PDF · JSON · SRT</text></g>
+  </g><defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#91a4b9"/></marker></defs>
+</svg>

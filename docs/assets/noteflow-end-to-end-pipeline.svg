@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1080" viewBox="0 0 1800 1080" role="img" aria-labelledby="title desc">
+<title id="title">NoteFlow AI end-to-end processing pipeline</title>
+<desc id="desc">Detailed pipeline from input validation and routing through ASR, OCR, or manual text normalization, human correction, comparison and documentation review, tasks, audit logging, and exports.</desc>
+<defs>
+      <marker id="arrow" markerWidth="12" markerHeight="12" refX="9" refY="6" orient="auto" markerUnits="strokeWidth">
+        <path d="M0,0 L10,6 L0,12 z" fill="#173B70"/>
+      </marker>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#0F1F3D" flood-opacity="0.10"/></filter>
+    </defs>
+<rect width="1800" height="1080" fill="#FFFFFF"/>
+<text x="75" y="75" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="42" font-weight="800" fill="#0F1F3D"><tspan x="75" dy="0">End-to-end processing pipeline</tspan></text>
+<text x="75" y="120" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="21" font-weight="400" fill="#5B6B82"><tspan x="75" dy="0">Local-first ingestion, review, analysis, resolution, and export</tspan></text>
+<rect x="60" y="180" width="180" height="355" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="150" y="215" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="20" font-weight="750" fill="#1FAFA3"><tspan x="150" dy="0">INPUT</tspan></text>
+<rect x="85" y="230" width="130" height="48" rx="12" fill="#FFFFFF" stroke="#D6E0EA" stroke-width="2"/>
+<text x="112" y="262" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#173B70"><tspan x="112" dy="0">◉</tspan></text>
+<text x="145" y="262" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="650" fill="#0F1F3D"><tspan x="145" dy="0">Audio</tspan></text>
+<rect x="85" y="295" width="130" height="48" rx="12" fill="#FFFFFF" stroke="#D6E0EA" stroke-width="2"/>
+<text x="112" y="327" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#173B70"><tspan x="112" dy="0">▧</tspan></text>
+<text x="145" y="327" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="650" fill="#0F1F3D"><tspan x="145" dy="0">Image</tspan></text>
+<rect x="85" y="360" width="130" height="48" rx="12" fill="#FFFFFF" stroke="#D6E0EA" stroke-width="2"/>
+<text x="112" y="392" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#173B70"><tspan x="112" dy="0">▤</tspan></text>
+<text x="145" y="392" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="650" fill="#0F1F3D"><tspan x="145" dy="0">PDF</tspan></text>
+<rect x="85" y="425" width="130" height="48" rx="12" fill="#FFFFFF" stroke="#D6E0EA" stroke-width="2"/>
+<text x="112" y="457" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="700" fill="#173B70"><tspan x="112" dy="0">T</tspan></text>
+<text x="145" y="457" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="650" fill="#0F1F3D"><tspan x="145" dy="0">Manual text</tspan></text>
+<path d="M240,355 L290,355" stroke="#173B70" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="295" y="210" width="220" height="290" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="405" y="245" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="19" font-weight="750" fill="#1FAFA3"><tspan x="405" dy="0">UPLOAD VALIDATION</tspan><tspan x="405" dy="24">&amp; LOCAL STORAGE</tspan></text>
+<text x="405" y="330" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="500" fill="#0F1F3D"><tspan x="405" dy="0">Validate extension, size,</tspan><tspan x="405" dy="25">empty file, path, session,</tspan><tspan x="405" dy="25">and customer context</tspan></text>
+<text x="405" y="430" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="500" fill="#0F1F3D"><tspan x="405" dy="0">Store original source</tspan><tspan x="405" dy="25">safely on local storage</tspan></text>
+<path d="M515,355 L565,355" stroke="#173B70" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="570" y="245" width="175" height="220" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="657" y="280" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="750" fill="#1FAFA3"><tspan x="657" dy="0">INPUT ROUTER</tspan></text>
+<circle cx="657" cy="355" r="38" fill="#DDF7F2" stroke="#1FAFA3" stroke-width="2"/><circle cx="640" cy="345" r="6" fill="#1FAFA3"/><circle cx="675" cy="330" r="6" fill="#1FAFA3"/><circle cx="680" cy="375" r="6" fill="#1FAFA3"/><path d="M640,345 L675,330 M640,345 L680,375" stroke="#1FAFA3" stroke-width="4" fill="none"/>
+<text x="657" y="425" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="500" fill="#0F1F3D"><tspan x="657" dy="0">Route by</tspan><tspan x="657" dy="24">content type</tspan></text>
+<path d="M745,355 L790,355 L790,235" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M790,355 L790,475" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M790,230 L835,230" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="840" y="172" width="370" height="116" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="875" y="215" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="750" fill="#1FAFA3"><tspan x="875" dy="0">AUDIO</tspan></text>
+<text x="1015" y="215" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="19" font-weight="750" fill="#0F1F3D"><tspan x="1015" dy="0">Qwen3-ASR</tspan></text>
+<text x="1015" y="250" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="500" fill="#0F1F3D"><tspan x="1015" dy="0">transcription</tspan></text>
+<path d="M1210,230 L1250,230" stroke="#173B70" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="1255" y="172" width="250" height="116" rx="18" fill="#FFFFFF" stroke="#1FAFA3" stroke-width="2"/>
+<text x="1380" y="222" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="600" fill="#0F1F3D"><tspan x="1380" dy="0">Document record</tspan><tspan x="1380" dy="25">+ segments + confidence</tspan></text>
+<path d="M790,355 L835,355" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="840" y="297" width="370" height="116" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="875" y="340" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="750" fill="#1FAFA3"><tspan x="875" dy="0">IMAGE / PDF</tspan></text>
+<text x="1015" y="340" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="19" font-weight="750" fill="#0F1F3D"><tspan x="1015" dy="0">PaddleOCR</tspan></text>
+<text x="1015" y="375" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="500" fill="#0F1F3D"><tspan x="1015" dy="0">preprocessing &amp; OCR</tspan></text>
+<path d="M1210,355 L1250,355" stroke="#173B70" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="1255" y="297" width="250" height="116" rx="18" fill="#FFFFFF" stroke="#1FAFA3" stroke-width="2"/>
+<text x="1380" y="347" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="600" fill="#0F1F3D"><tspan x="1380" dy="0">Document record</tspan><tspan x="1380" dy="25">+ pages + blocks + confidence</tspan></text>
+<path d="M790,480 L835,480" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="840" y="422" width="370" height="116" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="875" y="465" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="750" fill="#1FAFA3"><tspan x="875" dy="0">MANUAL TEXT</tspan></text>
+<text x="1015" y="465" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="19" font-weight="750" fill="#0F1F3D"><tspan x="1015" dy="0">Text</tspan></text>
+<text x="1015" y="500" text-anchor="start" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="500" fill="#0F1F3D"><tspan x="1015" dy="0">normalization</tspan></text>
+<path d="M1210,480 L1250,480" stroke="#173B70" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="1255" y="422" width="250" height="116" rx="18" fill="#FFFFFF" stroke="#1FAFA3" stroke-width="2"/>
+<text x="1380" y="472" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="600" fill="#0F1F3D"><tspan x="1380" dy="0">Document record</tspan><tspan x="1380" dy="25">+ source metadata</tspan></text>
+<path d="M1505,230 L1545,230" stroke="#1FAFA3" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M1505,355 L1545,355" stroke="#1FAFA3" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M1505,480 L1545,480" stroke="#1FAFA3" stroke-width="3" fill="none" stroke-linecap="round"/>
+<path d="M1545,230 L1545,480" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1545,355 L1590,355" stroke="#173B70" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="1595" y="230" width="160" height="250" rx="20" fill="#FFF4DA" stroke="#F5A623" stroke-width="3"/>
+<text x="1675" y="270" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="19" font-weight="800" fill="#F5A623"><tspan x="1675" dy="0">HUMAN</tspan><tspan x="1675" dy="24">REVIEW</tspan></text>
+<circle cx="1660" cy="345" r="45" stroke="#173B70" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><line x1="1693" y1="378" x2="1730" y2="415" stroke="#173B70" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M1627,370 l58,-58 l22,22 l-58,58 l-30,8 z" stroke="#F5A623" stroke-width="5" fill="none" stroke-linejoin="round"/>
+<text x="1675" y="440" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="17" font-weight="600" fill="#0F1F3D"><tspan x="1675" dy="0">Inspect, correct,</tspan><tspan x="1675" dy="24">and finalize</tspan></text>
+<path d="M1675,480 L1675,570 L790,570" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M770,570 L770,610" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="620" y="615" width="300" height="155" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="770" y="650" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="800" fill="#1FAFA3"><tspan x="770" dy="0">COMPARE SOURCES</tspan></text>
+<text x="770" y="700" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" font-weight="500" fill="#0F1F3D"><tspan x="770" dy="0">WER, CER, token, numeric,</tspan><tspan x="770" dy="23">and unit mismatch checks</tspan></text>
+<path d="M1090,570 L1090,610" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="940" y="615" width="300" height="155" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="1090" y="650" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="800" fill="#1FAFA3"><tspan x="1090" dy="0">OLLAMA UTILITIES</tspan></text>
+<text x="1090" y="700" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" font-weight="500" fill="#0F1F3D"><tspan x="1090" dy="0">Summarize, key points, tasks,</tspan><tspan x="1090" dy="23">translation, and formatting</tspan></text>
+<path d="M1410,570 L1410,610" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="1260" y="615" width="300" height="155" rx="18" fill="#F6F9FC" stroke="#1FAFA3" stroke-width="2"/>
+<text x="1410" y="650" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="18" font-weight="800" fill="#1FAFA3"><tspan x="1410" dy="0">DOCUMENTATION REVIEW</tspan></text>
+<text x="1410" y="700" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" font-weight="500" fill="#0F1F3D"><tspan x="1410" dy="0">Deterministic missing, conflicting,</tspan><tspan x="1410" dy="23">low-confidence, and follow-up checks</tspan></text>
+<path d="M770,770 L770,815" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="645" y="820" width="250" height="100" rx="16" fill="#FFFFFF" stroke="#D6E0EA" stroke-width="2"/>
+<path d="M1090,770 L1090,815" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="965" y="820" width="250" height="100" rx="16" fill="#FFFFFF" stroke="#D6E0EA" stroke-width="2"/>
+<path d="M1410,770 L1410,815" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="1285" y="820" width="250" height="100" rx="16" fill="#FFFFFF" stroke="#D6E0EA" stroke-width="2"/>
+<text x="770" y="860" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" font-weight="600" fill="#0F1F3D"><tspan x="770" dy="0">Issues, evidence,</tspan><tspan x="770" dy="23">reviewer decision</tspan></text>
+<text x="1090" y="860" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" font-weight="600" fill="#0F1F3D"><tspan x="1090" dy="0">Summary, key points,</tspan><tspan x="1090" dy="23">tasks, formatted note</tspan></text>
+<text x="1410" y="860" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="16" font-weight="600" fill="#0F1F3D"><tspan x="1410" dy="0">Issues, evidence,</tspan><tspan x="1410" dy="23">reviewer decision</tspan></text>
+<path d="M770,920 L770,965 L1410,965 L1410,920" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M1090,965 L1090,995" stroke="#1FAFA3" stroke-width="4" fill="none" stroke-linecap="round" marker-end="url(#arrow)"/>
+<rect x="730" y="995" width="720" height="70" rx="18" fill="#DDF7F2" stroke="#1FAFA3" stroke-width="3"/>
+<text x="1090" y="1028" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="20" font-weight="800" fill="#0F1F3D"><tspan x="1090" dy="0">TASKS · AUDIT LOG · EXPORTS</tspan></text>
+<text x="1090" y="1053" text-anchor="middle" font-family="Inter,Segoe UI,Arial,sans-serif" font-size="15" font-weight="500" fill="#5B6B82"><tspan x="1090" dy="0">Actionable, traceable outputs for documentation workflows</tspan></text>
+</svg>

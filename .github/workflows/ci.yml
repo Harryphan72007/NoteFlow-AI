@@ -20,7 +20,7 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - run: python -m pip install --upgrade pip
       - run: pip install -r backend/requirements.txt
-      - run: pytest backend/tests
+      - run: python -m pytest backend/tests
 
   frontend:
     runs-on: ubuntu-latest

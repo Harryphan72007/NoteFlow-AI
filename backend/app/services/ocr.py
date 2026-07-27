@@ -6,7 +6,11 @@ from uuid import uuid4
 
 import fitz
 from PIL import Image, ImageEnhance, ImageFilter, ImageOps, UnidentifiedImageError
-from paddleocr import PaddleOCR
+
+try:
+    from paddleocr import PaddleOCR
+except ImportError:  # Optional heavyweight runtime; installed via requirements-models.txt.
+    PaddleOCR = None  # type: ignore[assignment,misc]
 
 from ..config import settings
 
@@ -20,6 +24,10 @@ _ENGINES: dict[str, PaddleOCR] = {}
 
 
 def _engine(language: str) -> PaddleOCR:
+    if PaddleOCR is None:
+        raise OCRServiceError(
+            "PaddleOCR is not installed; install backend/requirements-models.txt to enable OCR"
+        )
     if language not in _ENGINES:
         _ENGINES[language] = PaddleOCR(
             lang=language,

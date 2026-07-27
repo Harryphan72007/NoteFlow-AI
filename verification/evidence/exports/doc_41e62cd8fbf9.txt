@@ -1,9 +1,0 @@
-[audio - audio_fallback.txt]
-Take 0.5 mg once daily.
-
-[image - ocr_fallback.txt]
-Take 0.5 mg once daily.
-Allergy: Penicillin
-
-[manual_text - Audit manual A]
-Patient has chest pain. Started amoxicillin. Monitor tomorrow.

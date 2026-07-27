@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# Optional local OCR runtime. Install this file only when exercising PaddleOCR.
+paddleocr==3.7.0
+paddlepaddle==3.3.1

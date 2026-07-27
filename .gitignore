@@ -9,8 +9,8 @@ ckpt/
 *.db
 .pytest_cache/
 .pnpm-store/
-repair/logs/
 backend/storage/
-data/models/
+data/
 Frontend/.vite/
+Frontend/coverage/
 *.log

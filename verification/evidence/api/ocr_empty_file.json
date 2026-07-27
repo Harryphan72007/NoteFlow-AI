@@ -1,9 +1,0 @@
-{
-  "name": "ocr_empty_file",
-  "status_code": 422,
-  "expected_status": 422,
-  "pass": true,
-  "body": {
-    "detail": "Uploaded file is empty"
-  }
-}

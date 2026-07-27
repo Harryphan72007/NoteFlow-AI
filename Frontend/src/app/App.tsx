@@ -8,7 +8,7 @@ import {
   Download, Edit2, AlertTriangle, CheckCircle, XCircle, Clock,
   Search, Filter, ChevronDown, MoreHorizontal,
   Cpu, Database, Server, User, X, Check, Eye,
-  RefreshCw, Shield, AlertCircle, Calendar, FileAudio,
+  RefreshCw, AlertCircle, Calendar, FileAudio,
   Stethoscope, ClipboardList, Zap, BookOpen, Folder,
   TrendingUp, List, Layers as LayersIcon
 } from "lucide-react";
@@ -47,37 +47,6 @@ type Screen =
 
 // ─── Sample Data ──────────────────────────────────────────────
 
-const customers = [
-  { id: "PT-001847", name: "Sarah Chen",       dob: "1978-03-14", docs: 12, lastActivity: "Jan 15, 2024", status: "active",   risk: "amber" },
-  { id: "PT-001848", name: "Marcus Williams",  dob: "1965-07-22", docs: 8,  lastActivity: "Jan 15, 2024", status: "active",   risk: "green" },
-  { id: "PT-001849", name: "Elena Rodriguez",  dob: "1989-11-05", docs: 3,  lastActivity: "Jan 15, 2024", status: "active",   risk: "red",   duplicate: true },
-  { id: "PT-001850", name: "James O'Brien",    dob: "1952-09-18", docs: 24, lastActivity: "Dec 10, 2023", status: "archived", risk: "green" },
-  { id: "PT-001851", name: "Priya Patel",      dob: "1991-06-30", docs: 6,  lastActivity: "Jan 14, 2024", status: "active",   risk: "green" },
-  { id: "PT-001852", name: "David Kim",        dob: "1983-02-17", docs: 9,  lastActivity: "Jan 13, 2024", status: "active",   risk: "amber" },
-];
-
-const activityData = [
-  { day: "Mon", asr: 12, ocr: 8 },
-  { day: "Tue", asr: 15, ocr: 11 },
-  { day: "Wed", asr: 9,  ocr: 7 },
-  { day: "Thu", asr: 18, ocr: 14 },
-  { day: "Fri", asr: 22, ocr: 16 },
-  { day: "Sat", asr: 6,  ocr: 4 },
-  { day: "Sun", asr: 11, ocr: 8 },
-];
-
-const queueItems = [
-  { id: "Q-1042", customer: "Marcus Williams", type: "Upload Audio",   status: "processing", progress: 45, model: "Mega-ASR" },
-  { id: "Q-1043", customer: "Sarah Chen",      type: "Scan Document",  status: "queued",     progress: 0,  model: "OCR-v2" },
-  { id: "Q-1044", customer: "Elena Rodriguez", type: "Upload PDF",     status: "processing", progress: 78, model: "OCR-v2" },
-];
-
-const pendingReviews = [
-  { id: "R-201", customer: "Sarah Chen",      doc: "Visit Note — Jan 15, 2024", type: "clinical", priority: "high" },
-  { id: "R-202", customer: "Marcus Williams", doc: "Audio Recording — Jan 15",  type: "asr",      priority: "medium" },
-  { id: "R-203", customer: "Priya Patel",     doc: "Scan — Jan 14, 2024",       type: "ocr",      priority: "low" },
-];
-
 const allTasks = [
   { id: 1, title: "Verify Metformin dosage — ASR records 1000 mg, prescription shows 100 mg", customer: "Sarah Chen",      priority: "high",   due: "Today",         overdue: false },
   { id: 2, title: "Schedule 3-month follow-up appointment",                                    customer: "Marcus Williams", priority: "medium", due: "Tomorrow",      overdue: false },
@@ -86,16 +55,17 @@ const allTasks = [
   { id: 5, title: "Update emergency contact details",                                           customer: "Priya Patel",     priority: "low",    due: "Jan 20, 2024",  overdue: false },
 ];
 
-const historyItems = [
-  { id: "H-3001", time: "14:32", date: "Jan 15, 2024", customer: "Sarah Chen",      action: "Audio Upload → ASR Complete",          model: "Mega-ASR",   confidence: 94.2, status: "complete"        },
-  { id: "H-3002", time: "13:45", date: "Jan 15, 2024", customer: "Elena Rodriguez", action: "PDF Upload → OCR Complete",             model: "OCR-v2",     confidence: 87.1, status: "review-required" },
-  { id: "H-3003", time: "12:18", date: "Jan 15, 2024", customer: "Marcus Williams", action: "Manual Note → Saved",                   model: "—",          confidence: null, status: "complete"        },
-  { id: "H-3004", time: "11:55", date: "Jan 15, 2024", customer: "Priya Patel",     action: "Scan → OCR Processing Failed",          model: "OCR-v2",     confidence: null, status: "error"           },
-  { id: "H-3005", time: "10:30", date: "Jan 15, 2024", customer: "Sarah Chen",      action: "Clinical Review → Accepted with caveats", model: "Ollama/llama3", confidence: null, status: "complete"   },
-  { id: "H-3006", time: "09:15", date: "Jan 14, 2024", customer: "David Kim",       action: "Audio Upload → ASR Complete",          model: "Qwen3-ASR",  confidence: 91.8, status: "complete"        },
-];
-
-type CustomerRow = typeof customers[number] & { backendId?: string };
+type CustomerRow = {
+  id: string;
+  name: string;
+  dob: string;
+  docs: number;
+  lastActivity: string;
+  status: string;
+  risk: string;
+  duplicate?: boolean;
+  backendId?: string;
+};
 type DocumentRow = {
   id: string;
   name: string;
@@ -245,8 +215,8 @@ function Btn({
   );
 }
 
-function Card({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <div className={cn("bg-card border border-border rounded-lg", className)}>{children}</div>;
+function Card({ children, className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("bg-card border border-border rounded-lg", className)} {...props}>{children}</div>;
 }
 
 function KPICard({ label, value, sub, icon, trend, color = "blue" }: {
@@ -668,7 +638,7 @@ function CustomersScreen({
                           <div className="font-medium text-foreground flex items-center gap-1.5">
                             {c.name}
                             {(c as any).duplicate && (
-                              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" title="Potential duplicate record" />
+                              <AlertTriangle className="w-3.5 h-3.5 text-amber-500" aria-label="Potential duplicate record" />
                             )}
                           </div>
                         </div>
@@ -1865,7 +1835,12 @@ function ClinicalReviewScreen({ documentIds = [], onNavigate }: { documentIds?: 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {isRes && <Badge variant="green">Resolved</Badge>}
                     <button
-                      onClick={() => setResolved(p => { const n = new Set(p); isRes ? n.delete(issue.id) : n.add(issue.id); return n; })}
+                      onClick={() => setResolved(p => {
+                        const next = new Set(p);
+                        if (isRes) next.delete(issue.id);
+                        else next.add(issue.id);
+                        return next;
+                      })}
                       className="text-xs text-muted-foreground hover:text-foreground transition-colors"
                     >
                       {isRes ? "Unresolve" : "Dismiss"}
@@ -2542,6 +2517,9 @@ export default function App() {
     <div className="flex h-screen bg-background overflow-hidden">
       <Sidebar current={screen} onNavigate={setScreen} collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
       <main className="flex-1 overflow-hidden flex flex-col min-w-0">
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs font-medium text-amber-900">
+          Synthetic demo data · Prototype for documentation workflow evaluation only · Not for clinical use
+        </div>
         {screenEl}
       </main>
     </div>

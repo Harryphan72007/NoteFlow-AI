@@ -73,10 +73,12 @@ function buildUrl(path: string, query?: RequestOptions["query"]) {
 async function ensureToken() {
   const existing = window.localStorage.getItem("noteflow_session");
   if (existing) return existing;
+  const username = import.meta.env.VITE_AUTH_USERNAME ?? "local.user";
+  const password = import.meta.env.VITE_AUTH_PASSWORD ?? "noteflow-local";
   const response = await fetch(buildUrl("/auth/login"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username: "local.user", password: "noteflow-local" }),
+    body: JSON.stringify({ username, password }),
   });
   if (!response.ok) throw new Error("Unable to establish a local session");
   const body = await response.json() as { access_token: string };

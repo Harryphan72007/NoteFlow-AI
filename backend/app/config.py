@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -27,13 +28,15 @@ class Settings:
 
     asr_model_mode: str = os.getenv("ASR_MODEL_MODE", "Qwen3-ASR-0.6B")
     mega_asr_device: str = os.getenv("MEGA_ASR_DEVICE", "cpu")
-    mega_asr_root: Path = Path(os.getenv("MEGA_ASR_ROOT", "D:/Mega-ASR/Mega-ASR"))
+    mega_asr_root: Path = Path(os.getenv("MEGA_ASR_ROOT", "./data/models/mega-asr"))
     mega_asr_python: Path = Path(
-        os.getenv("MEGA_ASR_PYTHON", "C:/Users/Dell/anaconda3/envs/mega-asr/python.exe")
+        os.getenv("MEGA_ASR_PYTHON") or sys.executable
     )
-    mega_asr_ckpt_dir: Path = Path(os.getenv("MEGA_ASR_CKPT_DIR", "D:/Mega-ASR/Mega-ASR/ckpt/Mega-ASR"))
+    mega_asr_ckpt_dir: Path = Path(
+        os.getenv("MEGA_ASR_CKPT_DIR", "./data/models/mega-asr/checkpoints")
+    )
     qwen_asr_small_model_dir: Path = Path(
-        os.getenv("QWEN_ASR_SMALL_MODEL_DIR", "D:/Mega-ASR/Mega-ASR/ckpt/Mega-ASR/Qwen3-ASR-0.6B")
+        os.getenv("QWEN_ASR_SMALL_MODEL_DIR", "./data/models/qwen3-asr-0.6b")
     )
     mega_asr_numba_cache_dir: Path = Path(os.getenv("MEGA_ASR_NUMBA_CACHE_DIR", "./data/models/numba_cache"))
     mega_asr_timeout_seconds: int = int(os.getenv("MEGA_ASR_TIMEOUT_SECONDS", "3600"))

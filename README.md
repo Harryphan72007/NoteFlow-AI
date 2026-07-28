@@ -1,42 +1,79 @@
 # NoteFlow AI
 
-Local-first documentation workflow prototype for turning text, audio, and scanned documents into reviewable records.
+[![CI](https://github.com/Harryphan72007/NoteFlow-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Harryphan72007/NoteFlow-AI/actions/workflows/ci.yml)
+![Status](https://img.shields.io/badge/status-active%20prototype-2563EB)
+![Data](https://img.shields.io/badge/demo%20data-synthetic-0F766E)
 
-> **Prototype only.** Every record shown in the interface and screenshots is synthetic demo data. NoteFlow is not a diagnosis, treatment, or clinical decision system and has not been validated for real-world medical use.
+A local-first documentation workflow for turning text, audio, and scanned documents into reviewable records without hiding model output, corrections, confidence, or reviewer actions.
+
+> [!CAUTION]
+> NoteFlow is a software prototype, not a diagnosis, treatment, or clinical decision system. All interface records and screenshots use synthetic data. The project has not been validated for real-world medical use.
 
 ![NoteFlow dashboard with synthetic demo data](docs/assets/noteflow-dashboard.png)
 
-## Why it exists
+## Why NoteFlow
 
-Documentation pipelines often hide model failures behind a single generated output. NoteFlow keeps source material, model output, corrections, confidence, and reviewer actions visible so experiments can be inspected and reproduced.
+Many documentation pipelines collapse source material and model output into one generated record. NoteFlow keeps those stages separate so a reviewer can inspect what the system received, what a model produced, what changed, and who approved the correction.
 
-## What works
+## Capabilities
 
-- FastAPI API with authenticated local sessions and ownership checks
-- Manual note, ASR, and OCR ingestion paths
-- Correctable document records with audit history
-- WER/CER and numeric mismatch comparison
-- Documentation checks, follow-up tasks, and exports
-- React/Vite workflow UI
-- Backend tests plus frontend lint, type checking, test, and build gates
+| Area | Implemented workflow |
+| --- | --- |
+| Ingestion | Manual notes, audio, images, and document uploads |
+| Review | Correctable ASR/OCR records with original and edited values |
+| Comparison | WER, CER, and numeric-mismatch checks |
+| Documentation | Deterministic checks, issues, and follow-up tasks |
+| Traceability | Ownership checks, audit events, and export history |
+| Quality | Backend regression tests and frontend lint, type-check, test, and build gates |
+
+## Architecture
+
+```text
+React + TypeScript + Vite
+          │
+          │ authenticated REST requests
+          ▼
+       FastAPI
+          ├── SQLAlchemy entities and Alembic migrations
+          ├── upload, processed-file, and export storage
+          ├── optional ASR, OCR, and Ollama adapters
+          ├── comparison and documentation-review services
+          └── task, audit, and export services
+```
+
+The backend is the system of record. Original sources and corrected outputs remain separate, and model adapters fail visibly by default rather than silently changing behavior.
+
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the entity and service boundaries.
+
+## Technology
+
+**Backend:** Python, FastAPI, SQLAlchemy, Alembic, SQLite/PostgreSQL  
+**Frontend:** React 18, TypeScript, Vite, Tailwind CSS, Recharts  
+**Quality:** pytest, ESLint, TypeScript, Vitest, GitHub Actions  
+**Optional local integrations:** ASR, PaddleOCR, Ollama
 
 ## Quick start
 
-Prerequisites: Python 3.11+, Node.js 22+, and pnpm 10+.
+Prerequisites:
+
+- Python 3.11+
+- Node.js 22+
+- pnpm 10+
+
+Create the local environment and start the API:
 
 ```bash
 cp .env.example .env
 
 cd backend
 python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install -r requirements.txt
 alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-In another terminal:
+In another terminal, start the interface:
 
 ```bash
 cd Frontend
@@ -44,35 +81,66 @@ pnpm install
 pnpm dev
 ```
 
-Open `http://localhost:5173`. The development credentials are configured in `.env`.
+Open `http://localhost:5173`. Development credentials and local defaults are documented in `.env.example`; replace them before any shared deployment.
 
-Model runtimes are optional. Install `backend/requirements-models.txt` when exercising PaddleOCR and point the model variables in `.env` at local checkpoints. Private Mega-ASR code and checkpoints are not included.
+## Optional model runtimes
 
-## Verify
+The core workflow can be explored without distributing private models. Install `backend/requirements-models.txt` only when exercising PaddleOCR, then point the relevant `.env` variables at local checkpoints.
+
+Private Mega-ASR source code and checkpoints are not included. This repository contains only configuration and adapter boundaries for those external dependencies.
+
+## Verification
+
+Run backend checks:
 
 ```bash
 python -m pytest backend/tests
-cd Frontend && pnpm lint && pnpm typecheck && pnpm test && pnpm build
 ```
 
-## Architecture
+Run frontend checks:
 
-```text
-React/Vite UI
-    │ REST /api
-FastAPI
-    ├── SQLAlchemy + SQLite/PostgreSQL
-    ├── local upload/export storage
-    ├── optional ASR/OCR/Ollama adapters
-    └── comparison, review, task, audit, and export services
+```bash
+cd Frontend
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
 ```
 
-See [architecture](docs/ARCHITECTURE.md), [project status](docs/STATUS.md), and [privacy/safety boundaries](docs/PRIVACY.md).
+GitHub Actions runs both quality pipelines on pushes to `main` and pull requests.
 
-## Known limitations
+## Documentation
 
-- Prototype security defaults are for local development, not deployment.
-- The UI still mixes live API data with explicitly labeled synthetic fixtures.
-- Model checkpoints and private research code are not distributed.
-- No clinical, privacy, robustness, or performance validation is claimed.
-- There is no repository license; reuse permission has not been granted.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — system boundaries and data flow
+- [`docs/STATUS.md`](docs/STATUS.md) — implemented, in-progress, and explicitly unclaimed work
+- [`docs/PRIVACY.md`](docs/PRIVACY.md) — privacy and safety requirements
+
+## Project status
+
+**Implemented**
+
+- Customer, document, task, audit, and export API workflows
+- Manual text, audio, image, and document ingestion
+- Correctable ASR/OCR records
+- Comparison and deterministic documentation checks
+- React workflow interface
+- Backend regression tests and frontend quality gates
+
+**In progress**
+
+- Replacing remaining fixture-backed UI paths with live API state
+- Packaging local model setup and health diagnostics
+- Expanding frontend behavioral tests
+
+**Not claimed**
+
+- Production readiness
+- Clinical validation or regulatory compliance
+- Benchmark-quality model accuracy or latency
+- Distribution rights for private models, checkpoints, or research code
+
+## Privacy and licensing
+
+Never commit real patient, customer, employer, or research-lab data. Generated uploads, exports, databases, logs, model files, and environment secrets are intentionally ignored.
+
+This repository currently has no license. Reuse permission has not been granted.
